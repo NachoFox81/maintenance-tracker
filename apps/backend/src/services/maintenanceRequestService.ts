@@ -7,6 +7,7 @@ import { UserModel } from '../models/User';
 import {
   AssignMaintenanceRequestInput,
   CreateMaintenanceRequestInput,
+  UpdateMaintenanceRequestPriorityInput,
   UpdateMaintenanceRequestStatusInput,
 } from '../utils/validation';
 
@@ -102,6 +103,21 @@ export class MaintenanceRequestService {
     maintenanceRequest.completedAt =
       nextStatus === 'completed' ? new Date() : null;
 
+    await maintenanceRequest.save();
+
+    return maintenanceRequest;
+  }
+
+  async updatePriority(
+    requestId: string,
+    priorityData: UpdateMaintenanceRequestPriorityInput
+  ) {
+    const maintenanceRequest = await MaintenanceRequestModel.findById(requestId);
+    if (!maintenanceRequest) {
+      throw createError('Maintenance request not found', 404);
+    }
+
+    maintenanceRequest.priority = priorityData.priority;
     await maintenanceRequest.save();
 
     return maintenanceRequest;

@@ -41,6 +41,10 @@ export const updateMaintenanceRequestStatusSchema = z.object({
   status: z.enum(MAINTENANCE_REQUEST_STATUSES),
 });
 
+export const updateMaintenanceRequestPrioritySchema = z.object({
+  priority: z.enum(MAINTENANCE_REQUEST_PRIORITIES),
+});
+
 export const maintenanceRequestParamsSchema = z.object({
   id: z
     .string()
@@ -66,5 +70,8 @@ export type AssignMaintenanceRequestInput = z.infer<
 >;
 export type UpdateMaintenanceRequestStatusInput = z.infer<
   typeof updateMaintenanceRequestStatusSchema
+>;
+export type UpdateMaintenanceRequestPriorityInput = z.infer<
+  typeof updateMaintenanceRequestPrioritySchema
 >;
 export type PaginationQuery = z.infer<typeof paginationSchema>;

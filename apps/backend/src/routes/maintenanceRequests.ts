@@ -4,6 +4,7 @@ import {
   getAllMaintenanceRequests,
   getTenantMaintenanceRequests,
   submitMaintenanceRequest,
+  updateMaintenanceRequestPriority,
   updateMaintenanceRequestStatus,
 } from '../controllers/maintenanceRequestController';
 import { authenticate, authorize } from '../middleware/auth';
@@ -12,6 +13,7 @@ import {
   assignMaintenanceRequestSchema,
   createMaintenanceRequestSchema,
   maintenanceRequestParamsSchema,
+  updateMaintenanceRequestPrioritySchema,
   updateMaintenanceRequestStatusSchema,
 } from '../utils/validation';
 
@@ -40,6 +42,15 @@ router.patch(
   validateParams(maintenanceRequestParamsSchema),
   validateBody(updateMaintenanceRequestStatusSchema),
   updateMaintenanceRequestStatus
+);
+
+router.patch(
+  '/:id/priority',
+  authenticate,
+  authorize('manager', 'admin'),
+  validateParams(maintenanceRequestParamsSchema),
+  validateBody(updateMaintenanceRequestPrioritySchema),
+  updateMaintenanceRequestPriority
 );
 
 router.get('/', authenticate, authorize('tenant'), getTenantMaintenanceRequests);

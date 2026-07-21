@@ -81,3 +81,18 @@ export const updateMaintenanceRequestStatus = asyncHandler(
     });
   }
 );
+
+export const updateMaintenanceRequestPriority = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const maintenanceRequest = await maintenanceRequestService.updatePriority(
+      req.params.id,
+      req.body
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Maintenance request priority updated successfully',
+      data: { maintenanceRequest },
+    });
+  }
+);
