@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { DEFAULT_USER_ROLE, USER_ROLES } from '@doorloop/shared';
 import { useAuth } from '../contexts/AuthContext';
 import { RegisterFormData } from '../types';
 import { Building2, Eye, EyeOff } from 'lucide-react';
@@ -12,7 +13,7 @@ const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  role: z.enum(['admin', 'manager', 'tenant']).default('tenant'),
+  role: z.enum(USER_ROLES).default(DEFAULT_USER_ROLE),
 });
 
 const RegisterPage: React.FC = () => {
@@ -27,7 +28,7 @@ const RegisterPage: React.FC = () => {
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      role: 'tenant',
+      role: DEFAULT_USER_ROLE,
     },
   });
 

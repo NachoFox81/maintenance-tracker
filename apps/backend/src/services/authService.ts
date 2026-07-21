@@ -1,14 +1,9 @@
+import { JWTPayload, normalizeEmail } from '@doorloop/shared';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/User';
 import { RegisterInput, LoginInput } from '../utils/validation';
 import { createError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
-
-interface JWTPayload {
-  id: string;
-  email: string;
-  role: string;
-}
 
 export class AuthService {
   private generateToken(payload: JWTPayload): string {
@@ -25,14 +20,19 @@ export class AuthService {
   }
 
   async register(userData: RegisterInput) {
+    const normalizedEmail = normalizeEmail(userData.email);
+
     // Check if user already exists
-    const existingUser = await UserModel.findOne({ email: userData.email });
+    const existingUser = await UserModel.findOne({ email: normalizedEmail });
     if (existingUser) {
       throw createError('User already exists with this email', 400);
     }
 
     // Create new user
-    const user = new UserModel(userData);
+    const user = new UserModel({
+      ...userData,
+      email: normalizedEmail,
+    });
     await user.save();
 
     // Generate token
@@ -51,7 +51,8 @@ export class AuthService {
   }
 
   async login(credentials: LoginInput) {
-    const { email, password } = credentials;
+    const { password } = credentials;
+    const email = normalizeEmail(credentials.email);
 
     // Find user and include password for comparison
     const user = await UserModel.findOne({ email }).select('+password');

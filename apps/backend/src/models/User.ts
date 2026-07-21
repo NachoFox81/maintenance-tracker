@@ -4,6 +4,7 @@ import {
   pre,
   DocumentType,
 } from '@typegoose/typegoose';
+import { DEFAULT_USER_ROLE, UserRole, USER_ROLES } from '@doorloop/shared';
 import bcrypt from 'bcryptjs';
 
 @pre<User>('save', async function (next) {
@@ -34,10 +35,10 @@ export class User {
 
   @prop({
     required: true,
-    enum: ['admin', 'manager', 'tenant'],
-    default: 'tenant',
+    enum: USER_ROLES,
+    default: DEFAULT_USER_ROLE,
   })
-  public role!: 'admin' | 'manager' | 'tenant';
+  public role!: UserRole;
 
   @prop({ default: false })
   public isEmailVerified!: boolean;

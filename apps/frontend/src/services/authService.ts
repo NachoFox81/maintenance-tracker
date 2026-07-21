@@ -1,3 +1,4 @@
+import { AUTH_TOKEN_STORAGE_KEY, AUTH_USER_STORAGE_KEY } from '@doorloop/shared';
 import api, { handleApiResponse, handleApiError } from './api';
 import { AuthResponse, LoginFormData, RegisterFormData, User } from '../types';
 
@@ -40,28 +41,28 @@ export const authService = {
 
   // Local storage helpers
   setToken(token: string): void {
-    localStorage.setItem('token', token);
+    localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
   },
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
   },
 
   removeToken(): void {
-    localStorage.removeItem('token');
+    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
   },
 
   setUser(user: User): void {
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
   },
 
   getUser(): User | null {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem(AUTH_USER_STORAGE_KEY);
     return userStr ? JSON.parse(userStr) : null;
   },
 
   removeUser(): void {
-    localStorage.removeItem('user');
+    localStorage.removeItem(AUTH_USER_STORAGE_KEY);
   },
 
   logout(): void {

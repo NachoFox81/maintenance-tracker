@@ -1,3 +1,4 @@
+import { DEFAULT_USER_ROLE, USER_ROLES } from '@doorloop/shared';
 import { z } from 'zod';
 
 // Auth validation schemas
@@ -6,7 +7,7 @@ export const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   firstName: z.string().min(1, 'First name is required').trim(),
   lastName: z.string().min(1, 'Last name is required').trim(),
-  role: z.enum(['admin', 'manager', 'tenant']).default('tenant'),
+  role: z.enum(USER_ROLES).default(DEFAULT_USER_ROLE),
 });
 
 export const loginSchema = z.object({

@@ -1,3 +1,4 @@
+import { UserRole } from '@doorloop/shared';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UserModel } from '../models/User';
@@ -7,7 +8,7 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
     email: string;
-    role: string;
+    role: UserRole;
   };
 }
 
@@ -64,7 +65,7 @@ export const authenticate = async (
   }
 };
 
-export const authorize = (...roles: string[]) => {
+export const authorize = (...roles: UserRole[]) => {
   return (
     req: AuthenticatedRequest,
     res: Response,

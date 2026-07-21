@@ -6,6 +6,15 @@
 
 This is a clean fullstack development boilerplate built with modern web technologies and managed as an **Nx monorepo**. The application provides a solid foundation with authentication system and role-based access control, ready for your next project implementation.
 
+## Current Status
+
+As of July 21, 2026, the repository is in the authentication and platform-foundation stage.
+
+- Completed: monorepo setup, backend auth API, frontend auth flow, Docker/dev tooling, and a shared library for cross-app types/constants
+- Not implemented yet: the maintenance request domain described in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md)
+
+For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md).
+
 ## Architecture
 
 - **Monorepo**: Nx workspace for scalable development
@@ -246,6 +255,7 @@ nx run-many --target=lint --projects=backend,frontend
 
 - ✅ Nx workspace with intelligent build system
 - ✅ Shared TypeScript configurations
+- ✅ Shared cross-app library in `libs/shared`
 - ✅ Unified linting and testing setup
 - ✅ Dependency graph visualization
 - ✅ Affected project detection for CI/CD optimization
