@@ -28,6 +28,18 @@ export const createMaintenanceRequestSchema = z.object({
     .trim(),
 });
 
+export const assignMaintenanceRequestSchema = z.object({
+  assignedTo: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'Assigned user must be a valid id'),
+});
+
+export const maintenanceRequestParamsSchema = z.object({
+  id: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, 'Maintenance request id must be a valid id'),
+});
+
 // Query validation schemas
 export const paginationSchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -41,5 +53,8 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateMaintenanceRequestInput = z.infer<
   typeof createMaintenanceRequestSchema
+>;
+export type AssignMaintenanceRequestInput = z.infer<
+  typeof assignMaintenanceRequestSchema
 >;
 export type PaginationQuery = z.infer<typeof paginationSchema>;

@@ -1,6 +1,10 @@
 import { createError } from '../middleware/errorHandler';
 import { MaintenanceRequestModel } from '../models/MaintenanceRequest';
-import { CreateMaintenanceRequestInput } from '../utils/validation';
+import { UserModel } from '../models/User';
+import {
+  AssignMaintenanceRequestInput,
+  CreateMaintenanceRequestInput,
+} from '../utils/validation';
 
 export class MaintenanceRequestService {
   async createRequest(
@@ -28,6 +32,36 @@ export class MaintenanceRequestService {
     return MaintenanceRequestModel.find({ createdBy: tenantId }).sort({
       createdAt: -1,
     });
+  }
+
+  async getAllRequests() {
+    return MaintenanceRequestModel.find({}).sort({
+      createdAt: -1,
+    });
+  }
+
+  async assignRequest(
+    requestId: string,
+    assignmentData: AssignMaintenanceRequestInput
+  ) {
+    const maintenanceRequest = await MaintenanceRequestModel.findById(requestId);
+    if (!maintenanceRequest) {
+      throw createError('Maintenance request not found', 404);
+    }
+
+    const assignee = await UserModel.findById(assignmentData.assignedTo);
+    if (!assignee) {
+      throw createError('Assigned user not found', 404);
+    }
+
+    if (!['admin', 'manager'].includes(assignee.role)) {
+      throw createError('Assigned user must be an admin or manager', 400);
+    }
+
+    maintenanceRequest.assignedTo = assignee._id.toString();
+    await maintenanceRequest.save();
+
+    return maintenanceRequest;
   }
 }
 

@@ -60,6 +60,9 @@ export class MaintenanceRequest {
   @prop({ ref: () => User, required: true })
   public createdBy!: Ref<User>;
 
+  @prop({ ref: () => User, default: null })
+  public assignedTo?: Ref<User> | null;
+
   @prop({ type: () => Date, default: null })
   public completedAt?: Date | null;
 }

@@ -38,3 +38,31 @@ export const getTenantMaintenanceRequests = asyncHandler(
     });
   }
 );
+
+export const getAllMaintenanceRequests = asyncHandler(
+  async (_req: AuthenticatedRequest, res: Response) => {
+    const maintenanceRequests =
+      await maintenanceRequestService.getAllRequests();
+
+    res.status(200).json({
+      success: true,
+      message: 'All maintenance requests retrieved successfully',
+      data: { maintenanceRequests },
+    });
+  }
+);
+
+export const assignMaintenanceRequest = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const maintenanceRequest = await maintenanceRequestService.assignRequest(
+      req.params.id,
+      req.body
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Maintenance request assigned successfully',
+      data: { maintenanceRequest },
+    });
+  }
+);
