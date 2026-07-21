@@ -4,6 +4,7 @@ import {
   getAllMaintenanceRequests,
   getTenantMaintenanceRequests,
   submitMaintenanceRequest,
+  updateMaintenanceRequestStatus,
 } from '../controllers/maintenanceRequestController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateBody, validateParams } from '../middleware/validate';
@@ -11,6 +12,7 @@ import {
   assignMaintenanceRequestSchema,
   createMaintenanceRequestSchema,
   maintenanceRequestParamsSchema,
+  updateMaintenanceRequestStatusSchema,
 } from '../utils/validation';
 
 const router = Router();
@@ -29,6 +31,15 @@ router.patch(
   validateParams(maintenanceRequestParamsSchema),
   validateBody(assignMaintenanceRequestSchema),
   assignMaintenanceRequest
+);
+
+router.patch(
+  '/:id/status',
+  authenticate,
+  authorize('manager', 'admin'),
+  validateParams(maintenanceRequestParamsSchema),
+  validateBody(updateMaintenanceRequestStatusSchema),
+  updateMaintenanceRequestStatus
 );
 
 router.get('/', authenticate, authorize('tenant'), getTenantMaintenanceRequests);

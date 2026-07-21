@@ -1,10 +1,24 @@
 import { createError } from '../middleware/errorHandler';
-import { MaintenanceRequestModel } from '../models/MaintenanceRequest';
+import {
+  MaintenanceRequestModel,
+  MaintenanceRequestStatus,
+} from '../models/MaintenanceRequest';
 import { UserModel } from '../models/User';
 import {
   AssignMaintenanceRequestInput,
   CreateMaintenanceRequestInput,
+  UpdateMaintenanceRequestStatusInput,
 } from '../utils/validation';
+
+const VALID_STATUS_TRANSITIONS: Record<
+  MaintenanceRequestStatus,
+  MaintenanceRequestStatus[]
+> = {
+  open: ['in-progress', 'cancelled'],
+  'in-progress': ['completed', 'cancelled'],
+  completed: [],
+  cancelled: [],
+};
 
 export class MaintenanceRequestService {
   async createRequest(
@@ -59,6 +73,35 @@ export class MaintenanceRequestService {
     }
 
     maintenanceRequest.assignedTo = assignee._id.toString();
+    await maintenanceRequest.save();
+
+    return maintenanceRequest;
+  }
+
+  async updateStatus(
+    requestId: string,
+    statusData: UpdateMaintenanceRequestStatusInput
+  ) {
+    const maintenanceRequest = await MaintenanceRequestModel.findById(requestId);
+    if (!maintenanceRequest) {
+      throw createError('Maintenance request not found', 404);
+    }
+
+    const nextStatus = statusData.status;
+    const allowedTransitions =
+      VALID_STATUS_TRANSITIONS[maintenanceRequest.status];
+
+    if (!allowedTransitions.includes(nextStatus)) {
+      throw createError(
+        `Cannot change status from ${maintenanceRequest.status} to ${nextStatus}`,
+        400
+      );
+    }
+
+    maintenanceRequest.status = nextStatus;
+    maintenanceRequest.completedAt =
+      nextStatus === 'completed' ? new Date() : null;
+
     await maintenanceRequest.save();
 
     return maintenanceRequest;

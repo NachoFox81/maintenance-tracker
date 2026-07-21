@@ -66,3 +66,18 @@ export const assignMaintenanceRequest = asyncHandler(
     });
   }
 );
+
+export const updateMaintenanceRequestStatus = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const maintenanceRequest = await maintenanceRequestService.updateStatus(
+      req.params.id,
+      req.body
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Maintenance request status updated successfully',
+      data: { maintenanceRequest },
+    });
+  }
+);

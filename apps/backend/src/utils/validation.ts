@@ -1,6 +1,9 @@
 import { DEFAULT_USER_ROLE, USER_ROLES } from '@doorloop/shared';
 import { z } from 'zod';
-import { MAINTENANCE_REQUEST_PRIORITIES } from '../models/MaintenanceRequest';
+import {
+  MAINTENANCE_REQUEST_PRIORITIES,
+  MAINTENANCE_REQUEST_STATUSES,
+} from '../models/MaintenanceRequest';
 
 // Auth validation schemas
 export const registerSchema = z.object({
@@ -34,6 +37,10 @@ export const assignMaintenanceRequestSchema = z.object({
     .regex(/^[0-9a-fA-F]{24}$/, 'Assigned user must be a valid id'),
 });
 
+export const updateMaintenanceRequestStatusSchema = z.object({
+  status: z.enum(MAINTENANCE_REQUEST_STATUSES),
+});
+
 export const maintenanceRequestParamsSchema = z.object({
   id: z
     .string()
@@ -56,5 +63,8 @@ export type CreateMaintenanceRequestInput = z.infer<
 >;
 export type AssignMaintenanceRequestInput = z.infer<
   typeof assignMaintenanceRequestSchema
+>;
+export type UpdateMaintenanceRequestStatusInput = z.infer<
+  typeof updateMaintenanceRequestStatusSchema
 >;
 export type PaginationQuery = z.infer<typeof paginationSchema>;
