@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:7
     container_name: doorloop-assessment-mongodb
     restart: unless-stopped
     ports:
@@ -29,14 +27,11 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/doorloop_assessment
       JWT_SECRET: your-super-secret-jwt-key-for-assessment
       JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:3000
     depends_on:
       - mongodb
-    volumes:
-      - ./apps/backend:/app
-      - /app/node_modules
     networks:
       - assessment-network
-    command: sh -c "npm run build && npm start"
 
   frontend:
     build:
@@ -47,15 +42,11 @@ services:
     ports:
       - '3000:3000'
     environment:
-      REACT_APP_API_URL: http://localhost:3001/api
+      VITE_API_URL: /api
     depends_on:
       - backend
-    volumes:
-      - ./apps/frontend:/app
-      - /app/node_modules
     networks:
       - assessment-network
-    command: npm run dev
 
 volumes:
   mongodb_data:

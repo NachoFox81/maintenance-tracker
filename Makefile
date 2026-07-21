@@ -75,16 +75,16 @@ clean:
 # Docker commands
 docker-up:
 	@echo "Starting Docker services..."
-	docker-compose up -d
+	docker compose up -d
 	@echo "✅ Services started! Check http://localhost:3000"
 
 docker-down:
 	@echo "Stopping Docker services..."
-	docker-compose down
+	docker compose down
 
 docker-build:
 	@echo "Building Docker images..."
-	docker-compose build
+	docker compose build
 
 # Seed database
 seed:

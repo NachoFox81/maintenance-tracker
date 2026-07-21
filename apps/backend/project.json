@@ -64,7 +64,7 @@
     "seed": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "ts-node src/scripts/seed.ts",
+        "command": "tsx src/scripts/seed.ts",
         "cwd": "apps/backend"
       }
     }
