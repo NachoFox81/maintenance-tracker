@@ -11,11 +11,16 @@ export const errorHandler = (
   err: AppError | ZodError | Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   let statusCode = 500;
   let message = 'Internal Server Error';
-  let errors: any = undefined;
+  let errors:
+    | Array<{
+        field: string;
+        message: string;
+      }>
+    | undefined;
 
   // Zod validation errors
   if (err instanceof ZodError) {
@@ -37,7 +42,11 @@ export const errorHandler = (
     message = 'Validation Error';
   }
   // Mongoose duplicate key error
-  else if (err.name === 'MongoServerError' && (err as any).code === 11000) {
+  else if (
+    err.name === 'MongoServerError' &&
+    'code' in err &&
+    err.code === 11000
+  ) {
     statusCode = 400;
     message = 'Duplicate field value';
   }
@@ -76,7 +85,9 @@ export const createError = (
   return error;
 };
 
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<unknown>
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };

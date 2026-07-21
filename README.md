@@ -121,6 +121,7 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 - `make build` - Build both applications
 - `make test` - Run tests for both applications
 - `make lint` - Lint all applications
+- `npm run verify:commit` - Run the same lint and test checks enforced before each commit
 - `make lint-fix` - Fix linting issues automatically
 - `make format` - Format code with Prettier
 - `make format-check` - Check code formatting
@@ -144,6 +145,14 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 - `nx affected --target=build` - Build only affected projects
 - `nx affected --target=test` - Test only affected projects
 - `nx affected --target=lint` - Lint only affected projects
+
+## Commit Guardrail
+
+Git commits are protected by `lefthook` via the tracked [lefthook.yml](/Users/margaretbehm/Desktop/technical-fullstack-assessment-main/lefthook.yml:1) config.
+
+- The `pre-commit` hook runs `npm run verify:commit`, which executes the workspace lint and test suites.
+- `npm install` automatically runs `npm run prepare`, which calls `lefthook install` for the local clone.
+- If you need to re-enable hooks manually in an existing clone, run `npm run prepare`.
 
 ## Test Accounts
 

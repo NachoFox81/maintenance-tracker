@@ -28,7 +28,9 @@
     "affected": "nx affected",
     "affected:build": "nx affected --target=build",
     "affected:test": "nx affected --target=test",
-    "affected:lint": "nx affected --target=lint"
+    "affected:lint": "nx affected --target=lint",
+    "verify:commit": "npm run lint --workspace=apps/backend && npm run lint --workspace=apps/frontend && npm run test --workspace=apps/backend -- --run --passWithNoTests && npm run test --workspace=apps/frontend -- --run --passWithNoTests",
+    "prepare": "lefthook install"
   },
   "keywords": [
     "doorloop",
@@ -57,6 +59,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "lefthook": "^1.13.6",
     "nx": "^17.2.8",
     "prettier": "^3.0.0",
     "typescript": "^5.1.6"
