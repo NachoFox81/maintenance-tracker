@@ -8,10 +8,11 @@ import {
   updateMaintenanceRequestStatus,
 } from '../controllers/maintenanceRequestController';
 import { authenticate, authorize } from '../middleware/auth';
-import { validateBody, validateParams } from '../middleware/validate';
+import { validateBody, validateParams, validateQuery } from '../middleware/validate';
 import {
   assignMaintenanceRequestSchema,
   createMaintenanceRequestSchema,
+  maintenanceRequestFilterQuerySchema,
   maintenanceRequestParamsSchema,
   updateMaintenanceRequestPrioritySchema,
   updateMaintenanceRequestStatusSchema,
@@ -23,6 +24,7 @@ router.get(
   '/all',
   authenticate,
   authorize('manager', 'admin'),
+  validateQuery(maintenanceRequestFilterQuerySchema),
   getAllMaintenanceRequests
 );
 

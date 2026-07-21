@@ -40,9 +40,9 @@ export const getTenantMaintenanceRequests = asyncHandler(
 );
 
 export const getAllMaintenanceRequests = asyncHandler(
-  async (_req: AuthenticatedRequest, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     const maintenanceRequests =
-      await maintenanceRequestService.getAllRequests();
+      await maintenanceRequestService.getAllRequests(req.query);
 
     res.status(200).json({
       success: true,

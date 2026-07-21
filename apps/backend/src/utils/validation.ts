@@ -51,6 +51,11 @@ export const maintenanceRequestParamsSchema = z.object({
     .regex(/^[0-9a-fA-F]{24}$/, 'Maintenance request id must be a valid id'),
 });
 
+export const maintenanceRequestFilterQuerySchema = z.object({
+  status: z.enum(MAINTENANCE_REQUEST_STATUSES).optional(),
+  priority: z.enum(MAINTENANCE_REQUEST_PRIORITIES).optional(),
+});
+
 // Query validation schemas
 export const paginationSchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -73,5 +78,8 @@ export type UpdateMaintenanceRequestStatusInput = z.infer<
 >;
 export type UpdateMaintenanceRequestPriorityInput = z.infer<
   typeof updateMaintenanceRequestPrioritySchema
+>;
+export type MaintenanceRequestFilterQuery = z.infer<
+  typeof maintenanceRequestFilterQuerySchema
 >;
 export type PaginationQuery = z.infer<typeof paginationSchema>;

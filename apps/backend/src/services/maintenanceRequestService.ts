@@ -7,6 +7,7 @@ import { UserModel } from '../models/User';
 import {
   AssignMaintenanceRequestInput,
   CreateMaintenanceRequestInput,
+  MaintenanceRequestFilterQuery,
   UpdateMaintenanceRequestPriorityInput,
   UpdateMaintenanceRequestStatusInput,
 } from '../utils/validation';
@@ -49,8 +50,11 @@ export class MaintenanceRequestService {
     });
   }
 
-  async getAllRequests() {
-    return MaintenanceRequestModel.find({}).sort({
+  async getAllRequests(filters: MaintenanceRequestFilterQuery = {}) {
+    return MaintenanceRequestModel.find({
+      ...(filters.status && { status: filters.status }),
+      ...(filters.priority && { priority: filters.priority }),
+    }).sort({
       createdAt: -1,
     });
   }
