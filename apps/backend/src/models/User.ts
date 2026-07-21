@@ -21,38 +21,45 @@ import bcrypt from 'bcryptjs';
   }
 })
 export class User {
-  @prop({ required: true, unique: true, lowercase: true, trim: true })
+  @prop({
+    type: () => String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  })
   public email!: string;
 
-  @prop({ required: true, minlength: 6 })
+  @prop({ type: () => String, required: true, minlength: 6 })
   public password!: string;
 
-  @prop({ required: true, trim: true })
+  @prop({ type: () => String, required: true, trim: true })
   public firstName!: string;
 
-  @prop({ required: true, trim: true })
+  @prop({ type: () => String, required: true, trim: true })
   public lastName!: string;
 
   @prop({
+    type: () => String,
     required: true,
     enum: USER_ROLES,
     default: DEFAULT_USER_ROLE,
   })
   public role!: UserRole;
 
-  @prop({ default: false })
+  @prop({ type: () => Boolean, default: false })
   public isEmailVerified!: boolean;
 
-  @prop()
+  @prop({ type: () => String })
   public resetPasswordToken?: string;
 
-  @prop()
+  @prop({ type: () => Date })
   public resetPasswordExpires?: Date;
 
-  @prop({ default: Date.now })
+  @prop({ type: () => Date, default: Date.now })
   public createdAt!: Date;
 
-  @prop({ default: Date.now })
+  @prop({ type: () => Date, default: Date.now })
   public updatedAt!: Date;
 
   // Instance method to compare password

@@ -1,3 +1,6 @@
+import 'reflect-metadata';
+import fs from 'fs';
+import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,8 +13,17 @@ import { errorHandler } from './middleware/errorHandler';
 // Routes
 import authRoutes from './routes/auth';
 
+const envCandidates = [
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), 'apps/backend/.env'),
+  path.resolve(__dirname, '../.env'),
+  path.resolve(__dirname, '../../../../apps/backend/.env'),
+];
+
+const envPath = envCandidates.find(candidate => fs.existsSync(candidate));
+
 // Load environment variables
-dotenv.config();
+dotenv.config(envPath ? { path: envPath } : undefined);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
