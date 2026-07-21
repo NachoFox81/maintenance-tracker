@@ -1,5 +1,6 @@
 import { DEFAULT_USER_ROLE, USER_ROLES } from '@doorloop/shared';
 import { z } from 'zod';
+import { MAINTENANCE_REQUEST_PRIORITIES } from '../models/MaintenanceRequest';
 
 // Auth validation schemas
 export const registerSchema = z.object({
@@ -15,6 +16,18 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+export const createMaintenanceRequestSchema = z.object({
+  title: z.string().min(1, 'Title is required').trim(),
+  description: z.string().min(1, 'Description is required').trim(),
+  priority: z
+    .enum(MAINTENANCE_REQUEST_PRIORITIES)
+    .default('normal'),
+  propertyUnitIdentifier: z
+    .string()
+    .min(1, 'Property/unit identifier is required')
+    .trim(),
+});
+
 // Query validation schemas
 export const paginationSchema = z.object({
   page: z.coerce.number().min(1).default(1),
@@ -26,4 +39,7 @@ export const paginationSchema = z.object({
 // Type exports
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type CreateMaintenanceRequestInput = z.infer<
+  typeof createMaintenanceRequestSchema
+>;
 export type PaginationQuery = z.infer<typeof paginationSchema>;
