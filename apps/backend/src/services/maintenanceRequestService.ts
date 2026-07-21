@@ -19,6 +19,16 @@ export class MaintenanceRequestService {
 
     return maintenanceRequest;
   }
+
+  async getTenantRequests(tenantId: string) {
+    if (!tenantId) {
+      throw createError('Authenticated tenant is required', 401);
+    }
+
+    return MaintenanceRequestModel.find({ createdBy: tenantId }).sort({
+      createdAt: -1,
+    });
+  }
 }
 
 export const maintenanceRequestService = new MaintenanceRequestService();

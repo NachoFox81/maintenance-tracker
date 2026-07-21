@@ -1,10 +1,15 @@
 import { Router } from 'express';
-import { submitMaintenanceRequest } from '../controllers/maintenanceRequestController';
+import {
+  getTenantMaintenanceRequests,
+  submitMaintenanceRequest,
+} from '../controllers/maintenanceRequestController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { createMaintenanceRequestSchema } from '../utils/validation';
 
 const router = Router();
+
+router.get('/', authenticate, authorize('tenant'), getTenantMaintenanceRequests);
 
 router.post(
   '/',

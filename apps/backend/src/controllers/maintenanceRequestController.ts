@@ -21,3 +21,20 @@ export const submitMaintenanceRequest = asyncHandler(
     });
   }
 );
+
+export const getTenantMaintenanceRequests = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      throw createError('Authenticated tenant is required', 401);
+    }
+
+    const maintenanceRequests =
+      await maintenanceRequestService.getTenantRequests(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Maintenance requests retrieved successfully',
+      data: { maintenanceRequests },
+    });
+  }
+);
