@@ -1,4 +1,5 @@
 import { createError } from '../middleware/errorHandler';
+import type { PopulateOptions } from 'mongoose';
 import {
   MaintenanceRequestModel,
   MaintenanceRequestStatus,
@@ -23,7 +24,7 @@ const VALID_STATUS_TRANSITIONS: Record<
 };
 
 export class MaintenanceRequestService {
-  private readonly requestPopulation = [
+  private readonly requestPopulation: PopulateOptions[] = [
     {
       path: 'createdBy',
       select: 'firstName lastName email role',
@@ -32,7 +33,7 @@ export class MaintenanceRequestService {
       path: 'assignedTo',
       select: 'firstName lastName email role',
     },
-  ] as const;
+  ];
 
   async createRequest(
     tenantId: string,
@@ -92,7 +93,7 @@ export class MaintenanceRequestService {
       throw createError('Assigned user must be an admin or manager', 400);
     }
 
-    maintenanceRequest.assignedTo = assignee._id.toString();
+    maintenanceRequest.assignedTo = assignee._id;
     await maintenanceRequest.save();
 
     return maintenanceRequest.populate(this.requestPopulation);

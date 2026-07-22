@@ -9,6 +9,10 @@ import {
 } from 'lucide-react';
 import MaintenanceRequestDeleteModal from '../MaintenanceRequestDeleteModal/MaintenanceRequestDeleteModal';
 import {
+  MaintenanceRequestPriority,
+  MaintenanceRequestStatus,
+} from '../../../types';
+import {
   formatDate,
   formatRequestUser,
   priorityClasses,

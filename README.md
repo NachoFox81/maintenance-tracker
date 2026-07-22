@@ -315,6 +315,35 @@ Before deployment:
 3. Set backend CORS to the deployed frontend URL.
 4. Verify Atlas network access and credentials.
 5. Run `npm run verify:commit`.
+
+### Render backend setup
+
+This repository now includes a root [render.yaml](/Users/margaretbehm/Desktop/technical-fullstack-assessment-main/render.yaml) for the backend service.
+
+- The backend build runs from the repository root so it can access both `apps/backend` and `libs/shared`.
+- Render should use:
+  - Build Command: `npm install && npm run build --workspace=apps/backend`
+  - Start Command: `npm run start --workspace=apps/backend`
+  - Health Check Path: `/health`
+- Required Render env vars:
+  - `MONGODB_URI`
+  - `JWT_SECRET`
+  - `CORS_ORIGIN`
+- Recommended additional env vars:
+  - `JWT_EXPIRES_IN=7d`
+  - `RATE_LIMIT_WINDOW_MS=900000`
+  - `RATE_LIMIT_MAX_REQUESTS=100`
+
+### Netlify frontend setup
+
+This repository now includes a root [netlify.toml](/Users/margaretbehm/Desktop/technical-fullstack-assessment-main/netlify.toml) for the frontend site.
+
+- Build Command: `npm run build --workspace=apps/frontend`
+- Publish Directory: `apps/frontend/dist`
+- Required frontend env var:
+  - `VITE_API_URL=https://<your-render-service>.onrender.com/api`
+
+After the frontend deploy is live, update the backend `CORS_ORIGIN` to the deployed Netlify site URL.
 - ✅ Property management interface
 
 ### Monorepo Features

@@ -82,19 +82,32 @@ export const handleApiResponse = <T>(response: { data: ApiResponse<T> }): T => {
 };
 
 // Helper function to handle API errors
-export const handleApiError = (
-  error: {
-    response?: { data?: { message?: string } };
-    message?: string;
-  }
-): never => {
-  if (error.response?.data?.message) {
+export const handleApiError = (error: unknown): never => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof error.response === 'object' &&
+    error.response !== null &&
+    'data' in error.response &&
+    typeof error.response.data === 'object' &&
+    error.response.data !== null &&
+    'message' in error.response.data &&
+    typeof error.response.data.message === 'string'
+  ) {
     throw new Error(error.response.data.message);
-  } else if (error.message) {
-    throw new Error(error.message);
-  } else {
-    throw new Error('An unexpected error occurred');
   }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    throw new Error(error.message);
+  }
+
+  throw new Error('An unexpected error occurred');
 };
 
 export default api;
