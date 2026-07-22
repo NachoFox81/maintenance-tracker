@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { AlertCircle, ClipboardList, Loader2, PlusCircle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import ManagementMaintenanceWorkspace from '../components/maintenance/ManagementMaintenanceWorkspace';
+import TenantMaintenanceWorkspace from '../components/maintenance/TenantMaintenanceWorkspace';
 import { useAuth } from '../contexts/AuthContext';
 import { maintenanceService } from '../services/maintenanceService';
 import {
@@ -16,27 +17,13 @@ const defaultFormValues: CreateMaintenanceRequestFormData = {
   propertyUnitIdentifier: '',
 };
 
-const statusClasses: Record<MaintenanceRequestStatus, string> = {
-  open: 'bg-amber-100 text-amber-800',
-  'in-progress': 'bg-sky-100 text-sky-800',
-  completed: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-gray-200 text-gray-700',
-};
-
-const priorityClasses: Record<MaintenanceRequestPriority, string> = {
-  low: 'bg-slate-100 text-slate-700',
-  normal: 'bg-indigo-100 text-indigo-700',
-  high: 'bg-orange-100 text-orange-700',
-  urgent: 'bg-rose-100 text-rose-700',
-};
-
-const formatDate = (value: string | null | undefined) => {
-  if (!value) {
-    return 'Not completed';
-  }
-
-  return new Date(value).toLocaleString();
-};
+const replaceRequest = (
+  requests: MaintenanceRequest[],
+  nextRequest: MaintenanceRequest
+) =>
+  requests.map(request =>
+    request._id === nextRequest._id ? nextRequest : request
+  );
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -45,37 +32,86 @@ const DashboardPage: React.FC = () => {
     useState<CreateMaintenanceRequestFormData>(defaultFormValues);
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [operationsError, setOperationsError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [assignmentDrafts, setAssignmentDrafts] = useState<
+    Record<string, string>
+  >({});
+  const hasLoadedRequests = useRef(false);
+
+  const isTenant = user?.role === 'tenant';
+  const canManageQueue = user?.role === 'manager' || user?.role === 'admin';
+  const canAssign = user?.role === 'admin';
 
   useEffect(() => {
-    if (user?.role !== 'tenant') {
+    if (!user) {
       setIsLoadingRequests(false);
       return;
     }
 
     const loadRequests = async () => {
       try {
-        setIsLoadingRequests(true);
         setLoadError(null);
-        const { maintenanceRequests } = await maintenanceService.getMyRequests();
-        setRequests(maintenanceRequests);
+        setOperationsError(null);
+
+        if (!hasLoadedRequests.current) {
+          setIsLoadingRequests(true);
+        } else {
+          setIsRefreshing(true);
+        }
+
+        if (isTenant) {
+          const { maintenanceRequests } =
+            await maintenanceService.getMyRequests();
+          setRequests(maintenanceRequests);
+          return;
+        }
+
+        if (canManageQueue) {
+          const { maintenanceRequests } =
+            await maintenanceService.getAllRequests({
+              ...(statusFilter !== 'all' && {
+                status: statusFilter as MaintenanceRequestStatus,
+              }),
+              ...(priorityFilter !== 'all' && {
+                priority: priorityFilter as MaintenanceRequestPriority,
+              }),
+            });
+          setRequests(maintenanceRequests);
+          return;
+        }
+
+        setRequests([]);
       } catch (error) {
-        setLoadError(
+        const message =
           error instanceof Error
             ? error.message
-            : 'Failed to load maintenance requests'
-        );
+            : 'Failed to load maintenance requests';
+
+        if (isTenant) {
+          setLoadError(message);
+        } else {
+          setOperationsError(message);
+        }
       } finally {
+        hasLoadedRequests.current = true;
         setIsLoadingRequests(false);
+        setIsRefreshing(false);
       }
     };
 
     loadRequests();
-  }, [user?.role]);
+  }, [user, isTenant, canManageQueue, statusFilter, priorityFilter]);
 
   const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    event: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = event.target;
     setFormValues(current => ({
@@ -108,316 +144,122 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  if (!user || user.role !== 'tenant') {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-            Maintenance Operations
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600">
-            Tenant self-service is live. Manager and admin tooling is next, with
-            request triage, assignment, and filtered queue management.
-          </p>
-        </div>
+  const handleStatusUpdate = async (
+    requestId: string,
+    status: MaintenanceRequestStatus
+  ) => {
+    try {
+      setActiveRequestId(requestId);
+      setOperationsError(null);
+      const { maintenanceRequest } = await maintenanceService.updateStatus(
+        requestId,
+        status
+      );
+      setRequests(current => replaceRequest(current, maintenanceRequest));
+    } catch (error) {
+      setOperationsError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update request status'
+      );
+    } finally {
+      setActiveRequestId(null);
+    }
+  };
 
-        <section className="card overflow-hidden border-sky-200 bg-gradient-to-br from-sky-50 via-white to-indigo-50">
-          <div className="card-header">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
-              Next Up
-            </p>
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Manager workspace coming online
-            </h2>
-          </div>
-          <div className="card-content grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-white bg-white/80 p-4">
-              <p className="text-sm font-medium text-gray-900">
-                Filter live queues
-              </p>
-              <p className="mt-2 text-sm text-gray-600">
-                Narrow requests by status and priority from one operational
-                screen.
-              </p>
-            </div>
-            <div className="rounded-xl border border-white bg-white/80 p-4">
-              <p className="text-sm font-medium text-gray-900">
-                Assign ownership
-              </p>
-              <p className="mt-2 text-sm text-gray-600">
-                Admins can route work to the right manager without leaving the
-                request list.
-              </p>
-            </div>
-            <div className="rounded-xl border border-white bg-white/80 p-4">
-              <p className="text-sm font-medium text-gray-900">
-                Drive lifecycle updates
-              </p>
-              <p className="mt-2 text-sm text-gray-600">
-                Move requests from open to in-progress to completed with the
-                backend workflow already in place.
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
+  const handlePriorityUpdate = async (
+    requestId: string,
+    priority: MaintenanceRequestPriority
+  ) => {
+    try {
+      setActiveRequestId(requestId);
+      setOperationsError(null);
+      const { maintenanceRequest } = await maintenanceService.updatePriority(
+        requestId,
+        priority
+      );
+      setRequests(current => replaceRequest(current, maintenanceRequest));
+    } catch (error) {
+      setOperationsError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to update request priority'
+      );
+    } finally {
+      setActiveRequestId(null);
+    }
+  };
+
+  const handleAssignmentUpdate = async (requestId: string) => {
+    const assignedTo = assignmentDrafts[requestId]?.trim();
+    if (!assignedTo) {
+      setOperationsError('Enter a manager or admin user id to assign a request.');
+      return;
+    }
+
+    try {
+      setActiveRequestId(requestId);
+      setOperationsError(null);
+      const { maintenanceRequest } = await maintenanceService.assignRequest(
+        requestId,
+        assignedTo
+      );
+      setRequests(current => replaceRequest(current, maintenanceRequest));
+    } catch (error) {
+      setOperationsError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to assign maintenance request'
+      );
+    } finally {
+      setActiveRequestId(null);
+    }
+  };
+
+  if (isTenant) {
+    return (
+      <TenantMaintenanceWorkspace
+        firstName={user?.firstName}
+        requests={requests}
+        formValues={formValues}
+        isLoadingRequests={isLoadingRequests}
+        isSubmitting={isSubmitting}
+        loadError={loadError}
+        submitError={submitError}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+      />
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary-700">
-            Tenant Workspace
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
-            Maintenance requests for {user.firstName}
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600">
-            Report issues, track progress, and keep a clean record of what has
-            been fixed in your unit.
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-gray-900 px-5 py-4 text-white shadow-lg">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-300">
-            Open Requests
-          </p>
-          <p className="mt-2 text-3xl font-semibold">
-            {requests.filter(request => request.status === 'open').length}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_1.35fr]">
-        <section className="card overflow-hidden border-primary-100 shadow-md">
-          <div className="card-header border-b border-primary-100 bg-gradient-to-r from-primary-50 to-white">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-primary-100 p-2 text-primary-700">
-                <PlusCircle className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Submit a new request
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Give your property team the details they need to act quickly.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card-content pt-6">
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div>
-                <label
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                  htmlFor="title"
-                >
-                  Title
-                </label>
-                <input
-                  id="title"
-                  name="title"
-                  value={formValues.title}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="Leaky faucet in kitchen"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                  htmlFor="propertyUnitIdentifier"
-                >
-                  Property / Unit
-                </label>
-                <input
-                  id="propertyUnitIdentifier"
-                  name="propertyUnitIdentifier"
-                  value={formValues.propertyUnitIdentifier}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="Unit 2B"
-                  required
-                />
-              </div>
-
-              <div>
-                <label
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                  htmlFor="priority"
-                >
-                  Priority
-                </label>
-                <select
-                  id="priority"
-                  name="priority"
-                  value={formValues.priority}
-                  onChange={handleChange}
-                  className="input"
-                >
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                  htmlFor="description"
-                >
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formValues.description}
-                  onChange={handleChange}
-                  className="input min-h-[140px] resize-y py-3"
-                  placeholder="Share what is happening, when it started, and anything that helps the team reproduce the issue."
-                  required
-                />
-              </div>
-
-              {submitError ? (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                  {submitError}
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary btn-md w-full"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting request...
-                  </>
-                ) : (
-                  'Submit maintenance request'
-                )}
-              </button>
-            </form>
-          </div>
-        </section>
-
-        <section className="card overflow-hidden shadow-md">
-          <div className="card-header border-b border-gray-100 bg-white">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-gray-100 p-2 text-gray-700">
-                <ClipboardList className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  My requests
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Your newest requests appear first, with status and completion
-                  history.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card-content pt-6">
-            {isLoadingRequests ? (
-              <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50">
-                <div className="flex items-center gap-3 text-sm text-gray-500">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading your maintenance requests...
-                </div>
-              </div>
-            ) : loadError ? (
-              <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-6 text-center">
-                <AlertCircle className="h-8 w-8 text-rose-500" />
-                <p className="mt-3 text-sm font-medium text-rose-700">
-                  We could not load your requests.
-                </p>
-                <p className="mt-1 text-sm text-rose-600">{loadError}</p>
-              </div>
-            ) : requests.length === 0 ? (
-              <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 text-center">
-                <ClipboardList className="h-10 w-10 text-gray-400" />
-                <p className="mt-4 text-sm font-medium text-gray-900">
-                  No maintenance requests yet
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
-                  When you submit your first issue, it will appear here with its
-                  current status and timestamps.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {requests.map(request => (
-                  <article
-                    key={request._id}
-                    className="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5"
-                  >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="space-y-3">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {request.title}
-                            </h3>
-                            <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusClasses[request.status]}`}
-                            >
-                              {request.status}
-                            </span>
-                            <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${priorityClasses[request.priority]}`}
-                            >
-                              {request.priority}
-                            </span>
-                          </div>
-                          <p className="mt-2 text-sm text-gray-600">
-                            {request.description}
-                          </p>
-                        </div>
-
-                        <div className="grid gap-3 text-sm text-gray-600 sm:grid-cols-2">
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              Property / Unit
-                            </p>
-                            <p>{request.propertyUnitIdentifier}</p>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-800">Created</p>
-                            <p>{formatDate(request.createdAt)}</p>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              Completed
-                            </p>
-                            <p>{formatDate(request.completedAt)}</p>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              Last Updated
-                            </p>
-                            <p>{formatDate(request.updatedAt)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-    </div>
+    <ManagementMaintenanceWorkspace
+      role={user?.role}
+      requests={requests}
+      isLoadingRequests={isLoadingRequests}
+      isRefreshing={isRefreshing}
+      activeRequestId={activeRequestId}
+      operationsError={operationsError}
+      statusFilter={statusFilter}
+      priorityFilter={priorityFilter}
+      canAssign={canAssign}
+      assignmentDrafts={assignmentDrafts}
+      onStatusFilterChange={setStatusFilter}
+      onPriorityFilterChange={setPriorityFilter}
+      onResetFilters={() => {
+        setStatusFilter('all');
+        setPriorityFilter('all');
+      }}
+      onStatusUpdate={handleStatusUpdate}
+      onPriorityUpdate={handlePriorityUpdate}
+      onAssignmentDraftChange={(requestId, value) =>
+        setAssignmentDrafts(current => ({
+          ...current,
+          [requestId]: value,
+        }))
+      }
+      onAssignmentUpdate={handleAssignmentUpdate}
+    />
   );
 };
 

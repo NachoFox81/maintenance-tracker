@@ -39,3 +39,8 @@ export interface CreateMaintenanceRequestFormData {
   priority: MaintenanceRequestPriority;
   propertyUnitIdentifier: string;
 }
+
+export interface MaintenanceRequestFilters {
+  status?: MaintenanceRequestStatus;
+  priority?: MaintenanceRequestPriority;
+}
