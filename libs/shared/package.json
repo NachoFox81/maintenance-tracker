@@ -2,6 +2,6 @@
   "name": "@doorloop/shared",
   "version": "1.0.0",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "../../apps/backend/dist/libs/shared/src/index.js",
   "types": "./src/index.ts"
 }
