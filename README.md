@@ -1,17 +1,17 @@
-# DoorLoop Technical Assessment - Fullstack Development Boilerplate
+# DoorLoop Technical Assessment - Maintenance Tracker
 
 > **⚠️ Important**: Before setting up the project, please read the [ASSIGNMENT_DESCRIPTION.md](ASSIGNMENT_DESCRIPTION.md) first to understand the assessment requirements and context.
 
 ## Overview
 
-This is a clean fullstack development boilerplate built with modern web technologies and managed as an **Nx monorepo**. The application provides a solid foundation with authentication system and role-based access control, ready for your next project implementation.
+This repository contains a fullstack maintenance request tracking system built as an **Nx monorepo**. Tenants can submit and review their own maintenance requests, while managers and admins can work the shared queue, update request workflow details, and manage operational follow-up.
 
 ## Current Status
 
-As of July 21, 2026, the repository is in the authentication and platform-foundation stage.
+As of July 22, 2026, the core maintenance tracking feature set is implemented.
 
-- Completed: monorepo setup, backend auth API, frontend auth flow, Docker/dev tooling, and a shared library for cross-app types/constants
-- Not implemented yet: the maintenance request domain described in [PROJECT_REQUIREMENTS.md](PROJECT_REQUIREMENTS.md)
+- Completed: authentication, tenant request submission, tenant request history, manager/admin queue views, status updates, priority updates, admin assignment controls, delete flows, role-based access control, Docker/dev tooling, and a shared library for cross-app types/constants
+- In progress: production hardening, deployment documentation, and final cleanup of remaining lint warnings
 
 For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md).
 
@@ -22,6 +22,7 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 - **Frontend**: React 18 + TypeScript + Tailwind CSS + Vite
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT-based authentication with role-based access control
+- **Domain**: Maintenance request workflow with role-aware queue management
 - **Containerization**: Docker and Docker Compose
 - **Build System**: Nx with caching and dependency graph management
 
@@ -33,7 +34,7 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 - Node.js 18+ (for local development)
 - Git
 
-### Quick Start with Docker (Recommended)
+### Quick Start with Docker
 
 1. **Clone and start the application**:
 
@@ -47,9 +48,9 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 
 
    # Start all services
-   make docker-up
+   npm run docker:up
    # or
-   docker-compose up -d
+   docker compose up -d
    ```
 
 2. **Seed the database**:
@@ -61,9 +62,8 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 
 3. **Access the application**:
    - Frontend: http://localhost:3000
-
-- Backend API: http://localhost:3001
-- Health Check: http://localhost:3001/health
+   - Backend API: http://localhost:3001
+   - Health Check: http://localhost:3001/health
 
 ### Local Development Setup
 
@@ -79,7 +79,7 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 
    ```bash
    cp apps/backend/env.example apps/backend/.env
-   # Edit the .env file with your MongoDB connection string
+   # Edit the .env file with your MongoDB connection string and JWT settings
    ```
 
 3. **Start MongoDB** (if running locally):
@@ -92,42 +92,53 @@ For a focused summary of what has been built so far, see [docs/IMPLEMENTATION_PR
 4. **Start development servers**:
 
    ```bash
-   make dev
-   # or
    npm run dev
-   # or run individual apps:
-   nx dev backend
-   nx dev frontend
    ```
 
 5. **Seed the database**:
    ```bash
-   make seed
+   npm run seed
    ```
+
+## Environment Variables
+
+### Backend
+
+Create `apps/backend/.env` with values appropriate for your environment.
+
+- `PORT`: backend port, typically `3001`
+- `MONGODB_URI`: MongoDB Atlas or local Mongo connection string
+- `JWT_SECRET`: long random secret for signing JWTs
+- `JWT_EXPIRES_IN`: token lifetime such as `7d`
+- `FRONTEND_URL`: allowed frontend origin for CORS
+
+### Frontend
+
+Set the frontend API origin before production builds:
+
+- `VITE_API_URL`: backend API base URL, for example `https://your-backend.example.com/api`
 
 ## Available Scripts
 
 ### Docker Commands
 
-- `make docker-up` - Start all services with Docker
-- `make docker-down` - Stop all Docker services
-- `make docker-build` - Build Docker images
-- `make seed` - Seed the database with initial data
+- `npm run docker:up` - Start all services with Docker
+- `npm run docker:down` - Stop all Docker services
+- `npm run docker:build` - Build Docker images
+- `npm run seed` - Seed the database with initial data
 
 ### Nx Development Commands
 
-- `make dev` - Start both frontend and backend in development mode
-- `make install` - Install dependencies for all applications
-- `make build` - Build both applications
-- `make test` - Run tests for both applications
-- `make lint` - Lint all applications
+- `npm run dev` - Start both frontend and backend in development mode
+- `npm run build` - Build both applications
+- `npm run test` - Run tests for both applications
+- `npm run lint` - Lint all applications
 - `npm run verify:commit` - Run the same lint and test checks enforced before each commit
-- `make lint-fix` - Fix linting issues automatically
-- `make format` - Format code with Prettier
-- `make format-check` - Check code formatting
-- `make clean` - Clean node_modules and build artifacts
-- `make graph` - Show project dependency graph
-- `make affected` - Show affected projects
+- `npm run lint:fix` - Fix linting issues automatically
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run graph` - Show project dependency graph
+- `npm run affected` - Show affected projects
 
 ### Individual Project Commands
 
@@ -171,11 +182,47 @@ After seeding the database, you can use these test accounts:
 - `GET /profile` - Get user profile (authenticated)
 - `POST /refresh` - Refresh token (authenticated)
 
+### Maintenance Requests (`/api/maintenance-requests`)
+
+- `GET /` - Get the authenticated tenant's maintenance requests
+- `POST /` - Submit a new maintenance request as a tenant
+- `GET /all` - Get the full maintenance queue as a manager or admin
+- `PATCH /:id/status` - Update request status as a manager or admin
+- `PATCH /:id/priority` - Update request priority as a manager or admin
+- `PATCH /:id/assign` - Assign a request as an admin
+- `DELETE /:id` - Delete a request as a manager or admin
+
+### Users (`/api/users`)
+
+- `GET /assignable` - Get assignable admins and managers for request routing
+
 ## User Roles
 
 - **Admin**: Full system access
-- **Manager**: Extended permissions for business operations
-- **Tenant**: Basic user access
+- **Manager**: Queue visibility, status updates, priority updates, and delete access
+- **Tenant**: Request submission and self-service request history
+
+## Maintenance Features
+
+### Tenant Experience
+
+- Submit a maintenance request with title, description, priority, and property/unit identifier
+- View all personal maintenance requests
+- See request creation and completion timestamps
+- Receive inline feedback on request submission failures
+
+### Manager/Admin Experience
+
+- View all maintenance requests across the portfolio
+- Filter the queue by status and priority
+- Update request status through the allowed workflow
+- Update request priority
+- Delete maintenance requests
+- See queue-level load failures instead of misleading empty states
+
+### Admin-Only Controls
+
+- Assign requests to admins or managers from the queue workspace
 
 ## Project Structure
 
@@ -235,29 +282,39 @@ nx graph
 nx run-many --target=lint --projects=backend,frontend
 ```
 
-## Features
+## Testing
 
-### Backend Features
+The project includes lightweight but meaningful frontend and backend unit tests covering:
 
-- ✅ JWT-based authentication with role-based access control
-- ✅ RESTful API design with proper HTTP status codes
-- ✅ Input validation using Zod schemas
-- ✅ Error handling with detailed error messages
-- ✅ Rate limiting for API protection
-- ✅ Security headers with Helmet
-- ✅ CORS configuration
-- ✅ Structured logging with Winston
-- ✅ Database seeding for development
+- auth flows and auth-service behavior
+- maintenance request service rules
+- role-based middleware behavior
+- tenant request UI behavior
+- manager/admin queue behavior
+- delete modal behavior
+- frontend API redirect/error handling
 
-### Frontend Features
+Run everything with:
 
-- ✅ Modern React 18 with TypeScript
-- ✅ Responsive design with Tailwind CSS
-- ✅ Authentication context with persistent login
-- ✅ Protected routes with role-based access
-- ✅ Form handling with React Hook Form and Zod validation
-- ✅ Toast notifications for user feedback
-- ✅ Loading states and error handling
+```bash
+npm run verify:commit
+```
+
+## Production Notes
+
+Recommended deployment shape for this monorepo:
+
+- `apps/frontend` -> Netlify or Vercel
+- `apps/backend` -> Render
+- database -> MongoDB Atlas
+
+Before deployment:
+
+1. Set production env vars for both apps.
+2. Point `VITE_API_URL` at the deployed backend `/api` origin.
+3. Set backend CORS to the deployed frontend URL.
+4. Verify Atlas network access and credentials.
+5. Run `npm run verify:commit`.
 - ✅ Property management interface
 
 ### Monorepo Features
