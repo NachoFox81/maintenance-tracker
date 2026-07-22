@@ -107,4 +107,13 @@ export const maintenanceService = {
       return handleApiError(error);
     }
   },
+
+  async deleteRequest(requestId: string): Promise<void> {
+    try {
+      const response = await api.delete(`/maintenance-requests/${requestId}`);
+      handleApiResponse(response);
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };

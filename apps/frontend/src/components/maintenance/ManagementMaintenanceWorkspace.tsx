@@ -5,6 +5,7 @@ import {
   Loader2,
   RefreshCw,
   ShieldCheck,
+  Trash2,
 } from 'lucide-react';
 import {
   AssignableUser,
@@ -47,6 +48,7 @@ interface ManagementMaintenanceWorkspaceProps {
   ) => Promise<void>;
   onAssignmentDraftChange: (requestId: string, value: string) => void;
   onAssignmentUpdate: (requestId: string) => Promise<void>;
+  onDeleteRequest: (requestId: string) => Promise<void>;
 }
 
 const ManagementMaintenanceWorkspace: React.FC<
@@ -70,6 +72,7 @@ const ManagementMaintenanceWorkspace: React.FC<
   onPriorityUpdate,
   onAssignmentDraftChange,
   onAssignmentUpdate,
+  onDeleteRequest,
 }) => {
   return (
     <div className="space-y-8">
@@ -407,6 +410,20 @@ const ManagementMaintenanceWorkspace: React.FC<
                             </button>
                           </div>
                         ) : null}
+
+                        <button
+                          type="button"
+                          onClick={() => void onDeleteRequest(request._id)}
+                          disabled={isRowUpdating}
+                          className="inline-flex items-center justify-center rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+                        >
+                          {isRowUpdating ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                          )}
+                          Delete request
+                        </button>
                       </div>
                     </div>
                   </article>

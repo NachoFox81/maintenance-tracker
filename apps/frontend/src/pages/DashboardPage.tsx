@@ -221,6 +221,39 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  const handleDeleteRequest = async (requestId: string) => {
+    const requestToDelete = requests.find(request => request._id === requestId);
+
+    if (!requestToDelete) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `Delete "${requestToDelete.title}"? This cannot be undone.`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      setActiveRequestId(requestId);
+      setOperationsError(null);
+      await maintenanceService.deleteRequest(requestId);
+      setRequests(current =>
+        current.filter(request => request._id !== requestId)
+      );
+    } catch (error) {
+      setOperationsError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete maintenance request'
+      );
+    } finally {
+      setActiveRequestId(null);
+    }
+  };
+
   if (isTenant) {
     return (
       <TenantMaintenanceWorkspace
@@ -265,6 +298,7 @@ const DashboardPage: React.FC = () => {
         }))
       }
       onAssignmentUpdate={handleAssignmentUpdate}
+      onDeleteRequest={handleDeleteRequest}
     />
   );
 };
