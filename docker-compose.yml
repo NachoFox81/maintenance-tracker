@@ -24,8 +24,8 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
-      MONGODB_URI: mongodb://mongodb:27017/doorloop_assessment
-      JWT_SECRET: your-super-secret-jwt-key-for-assessment
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/doorloop_assessment}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-for-assessment}
       JWT_EXPIRES_IN: 7d
       CORS_ORIGIN: http://localhost:3000
     depends_on:
