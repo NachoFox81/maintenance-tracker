@@ -273,12 +273,6 @@ const TenantMaintenanceWorkspace: React.FC<TenantMaintenanceWorkspaceProps> = ({
                           </p>
                           <p>{formatDate(request.completedAt)}</p>
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-800">
-                            Last Updated
-                          </p>
-                          <p>{formatDate(request.updatedAt)}</p>
-                        </div>
                       </div>
                     </div>
                   </article>
