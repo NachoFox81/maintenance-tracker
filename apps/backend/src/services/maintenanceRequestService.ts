@@ -141,6 +141,15 @@ export class MaintenanceRequestService {
 
     return maintenanceRequest.populate(this.requestPopulation);
   }
+
+  async deleteRequest(requestId: string) {
+    const maintenanceRequest =
+      await MaintenanceRequestModel.findByIdAndDelete(requestId);
+
+    if (!maintenanceRequest) {
+      throw createError('Maintenance request not found', 404);
+    }
+  }
 }
 
 export const maintenanceRequestService = new MaintenanceRequestService();

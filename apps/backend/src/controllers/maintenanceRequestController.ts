@@ -96,3 +96,14 @@ export const updateMaintenanceRequestPriority = asyncHandler(
     });
   }
 );
+
+export const deleteMaintenanceRequest = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    await maintenanceRequestService.deleteRequest(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Maintenance request deleted successfully',
+    });
+  }
+);

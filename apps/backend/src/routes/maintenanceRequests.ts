@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   assignMaintenanceRequest,
+  deleteMaintenanceRequest,
   getAllMaintenanceRequests,
   getTenantMaintenanceRequests,
   submitMaintenanceRequest,
@@ -53,6 +54,14 @@ router.patch(
   validateParams(maintenanceRequestParamsSchema),
   validateBody(updateMaintenanceRequestPrioritySchema),
   updateMaintenanceRequestPriority
+);
+
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('manager', 'admin'),
+  validateParams(maintenanceRequestParamsSchema),
+  deleteMaintenanceRequest
 );
 
 router.get('/', authenticate, authorize('tenant'), getTenantMaintenanceRequests);
