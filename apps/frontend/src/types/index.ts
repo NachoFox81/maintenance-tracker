@@ -1,3 +1,5 @@
+import type { UserRole } from '@doorloop/shared';
+
 export type {
   ApiResponse,
   AuthResponse,
