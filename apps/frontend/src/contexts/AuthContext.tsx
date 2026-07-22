@@ -51,15 +51,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const { user: verifiedUser } = await authService.refreshToken();
             setUser(verifiedUser);
             authService.setUser(verifiedUser);
-          } catch (error) {
+          } catch {
             // Token is invalid, clear auth data
-            console.warn('Token verification failed:', error);
             authService.logout();
             setUser(null);
           }
         }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
+      } catch {
         authService.logout();
         setUser(null);
       } finally {
@@ -119,8 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { user: updatedUser } = await authService.getProfile();
       setUser(updatedUser);
       authService.setUser(updatedUser);
-    } catch (error) {
-      console.error('Failed to refresh user:', error);
+    } catch {
       logout();
     }
   };

@@ -7,6 +7,20 @@ import {
 import { DEFAULT_USER_ROLE, UserRole, USER_ROLES } from '@doorloop/shared';
 import bcrypt from 'bcryptjs';
 
+interface UserJsonShape {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+  isEmailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  fullName?: string;
+  password?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+}
+
 @pre<User>('save', async function (next) {
   // Only hash if password is new or modified and not already hashed
   if (!this.isModified('password') || this.password.startsWith('$2'))
@@ -76,8 +90,8 @@ export class User {
   }
 
   // Remove password from JSON output
-  public toJSON() {
-    const obj = (this as any).toObject();
+  public toJSON(this: DocumentType<User>) {
+    const obj = this.toObject() as UserJsonShape;
     delete obj.password;
     delete obj.resetPasswordToken;
     delete obj.resetPasswordExpires;

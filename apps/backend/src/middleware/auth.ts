@@ -12,6 +12,10 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+interface AuthTokenPayload extends jwt.JwtPayload {
+  id: string;
+}
+
 export const authenticate = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -38,7 +42,7 @@ export const authenticate = async (
       return;
     }
 
-    const decoded = jwt.verify(token, jwtSecret) as any;
+    const decoded = jwt.verify(token, jwtSecret) as AuthTokenPayload;
     const user = await UserModel.findById(decoded.id).select('-password');
 
     if (!user) {
