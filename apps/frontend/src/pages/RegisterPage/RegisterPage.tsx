@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { DEFAULT_USER_ROLE, USER_ROLES } from '@doorloop/shared';
-import { useAuth } from '../contexts/AuthContext';
-import { RegisterFormData } from '../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { RegisterFormData } from '../../types';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 
 const registerSchema = z.object({

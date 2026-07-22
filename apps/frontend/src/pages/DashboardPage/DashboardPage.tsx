@@ -1,15 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ManagementMaintenanceWorkspace from '../components/maintenance/ManagementMaintenanceWorkspace';
-import TenantMaintenanceWorkspace from '../components/maintenance/TenantMaintenanceWorkspace';
-import { useAuth } from '../contexts/AuthContext';
-import { maintenanceService } from '../services/maintenanceService';
+import ManagementMaintenanceWorkspace from '../../components/maintenance/ManagementMaintenanceWorkspace/ManagementMaintenanceWorkspace';
+import TenantMaintenanceWorkspace from '../../components/maintenance/TenantMaintenanceWorkspace/TenantMaintenanceWorkspace';
+import { useAuth } from '../../contexts/AuthContext';
+import { maintenanceService } from '../../services/maintenanceService';
 import {
   AssignableUser,
   CreateMaintenanceRequestFormData,
   MaintenanceRequest,
   MaintenanceRequestPriority,
   MaintenanceRequestStatus,
-} from '../types';
+} from '../../types';
 
 const defaultFormValues: CreateMaintenanceRequestFormData = {
   title: '',

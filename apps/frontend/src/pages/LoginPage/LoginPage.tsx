@@ -3,8 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth } from '../contexts/AuthContext';
-import { LoginFormData } from '../types';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoginFormData } from '../../types';
 import { Building2, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({

@@ -3,12 +3,12 @@ import { AlertCircle, ClipboardList, Loader2, PlusCircle } from 'lucide-react';
 import {
   CreateMaintenanceRequestFormData,
   MaintenanceRequest,
-} from '../../types';
+} from '../../../types';
 import {
   formatDate,
   priorityClasses,
   statusClasses,
-} from './maintenanceViewUtils';
+} from '../maintenanceViewUtils';
 
 interface TenantMaintenanceWorkspaceProps {
   firstName?: string;

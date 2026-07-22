@@ -1,6 +1,6 @@
 import React from 'react';
 import { Loader2, Trash2 } from 'lucide-react';
-import { MaintenanceRequest } from '../../types';
+import { MaintenanceRequest } from '../../../types';
 
 interface MaintenanceRequestDeleteModalProps {
   request: MaintenanceRequest;

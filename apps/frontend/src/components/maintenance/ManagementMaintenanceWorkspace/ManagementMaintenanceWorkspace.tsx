@@ -7,14 +7,14 @@ import {
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
-import MaintenanceRequestDeleteModal from './MaintenanceRequestDeleteModal';
+import MaintenanceRequestDeleteModal from '../MaintenanceRequestDeleteModal/MaintenanceRequestDeleteModal';
 import {
   AssignableUser,
   MaintenanceRequest,
   MaintenanceRequestPriority,
   MaintenanceRequestStatus,
   UserRole,
-} from '../../types';
+} from '../../../types';
 import {
   formatDate,
   formatRequestUser,
@@ -22,7 +22,7 @@ import {
   priorityOptions,
   statusClasses,
   statusOptions,
-} from './maintenanceViewUtils';
+} from '../maintenanceViewUtils';
 
 interface ManagementMaintenanceWorkspaceProps {
   role?: UserRole;
