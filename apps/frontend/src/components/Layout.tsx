@@ -26,7 +26,7 @@ const Layout: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Maintenance', href: '/', icon: Home },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   ];
 
