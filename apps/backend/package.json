@@ -5,7 +5,7 @@
   "main": "dist/apps/backend/src/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "npm --prefix ../../libs/shared run build && tsc",
     "start": "node dist/apps/backend/src/index.js",
     "test": "vitest --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts --watch",
