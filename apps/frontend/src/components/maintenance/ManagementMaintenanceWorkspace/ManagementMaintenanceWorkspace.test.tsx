@@ -37,6 +37,7 @@ const baseProps = {
   requests: [request],
   isLoadingRequests: false,
   isRefreshing: false,
+  loadError: null,
   activeRequestId: null,
   pendingDeleteRequest: null,
   operationsError: null,
@@ -115,5 +116,22 @@ describe('ManagementMaintenanceWorkspace', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /Delete request/i })[0]);
 
     expect(baseProps.onDeleteRequest).toHaveBeenCalledWith('request-1');
+  });
+
+  it('renders a queue-level error when loading requests fails', () => {
+    render(
+      <ManagementMaintenanceWorkspace
+        {...baseProps}
+        requests={[]}
+        loadError="Network error while loading the queue"
+      />
+    );
+
+    expect(
+      screen.getByText('We could not load the maintenance queue.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Network error while loading the queue')
+    ).toBeInTheDocument();
   });
 });

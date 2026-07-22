@@ -83,9 +83,12 @@ const useMaintenanceRequests = ({
             ? error.message
             : 'Failed to load maintenance requests';
 
+        setRequests([]);
+
         if (isTenant) {
           setLoadError(message);
         } else {
+          setLoadError(message);
           setOperationsError(message);
         }
       } finally {

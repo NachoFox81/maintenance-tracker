@@ -25,6 +25,7 @@ const ManagementMaintenanceWorkspace: React.FC<
   requests,
   isLoadingRequests,
   isRefreshing,
+  loadError,
   activeRequestId,
   pendingDeleteRequest,
   operationsError,
@@ -205,6 +206,14 @@ const ManagementMaintenanceWorkspace: React.FC<
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading maintenance queue...
               </div>
+            </div>
+          ) : loadError ? (
+            <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-6 text-center">
+              <ClipboardList className="h-10 w-10 text-rose-400" />
+              <p className="mt-4 text-sm font-medium text-rose-700">
+                We could not load the maintenance queue.
+              </p>
+              <p className="mt-1 text-sm text-rose-600">{loadError}</p>
             </div>
           ) : requests.length === 0 ? (
             <div className="flex min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 text-center">

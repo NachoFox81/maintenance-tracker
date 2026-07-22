@@ -60,6 +60,7 @@ const DashboardPage: React.FC = () => {
       requests={requests}
       isLoadingRequests={isLoadingRequests}
       isRefreshing={isRefreshing}
+      loadError={loadError}
       activeRequestId={activeRequestId}
       pendingDeleteRequest={pendingDeleteRequest}
       operationsError={operationsError}

@@ -11,6 +11,7 @@ export interface ManagementMaintenanceWorkspaceProps {
   requests: MaintenanceRequest[];
   isLoadingRequests: boolean;
   isRefreshing: boolean;
+  loadError: string | null;
   activeRequestId: string | null;
   pendingDeleteRequest: MaintenanceRequest | null;
   operationsError: string | null;
