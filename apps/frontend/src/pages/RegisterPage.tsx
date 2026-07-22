@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,19 +18,42 @@ const registerSchema = z.object({
 
 const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [inputsReady, setInputsReady] = useState(false);
   const { register: registerUser, loading } = useAuth();
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
       role: DEFAULT_USER_ROLE,
     },
   });
+
+  useEffect(() => {
+    reset({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      role: DEFAULT_USER_ROLE,
+    });
+    setInputsReady(false);
+
+    const frameId = window.requestAnimationFrame(() => {
+      setInputsReady(true);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [reset]);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -56,7 +79,27 @@ const RegisterPage: React.FC = () => {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
+          autoComplete="off"
+        >
+          <input
+            type="text"
+            name="prevent_autofill_email"
+            autoComplete="username"
+            tabIndex={-1}
+            className="hidden"
+            aria-hidden="true"
+          />
+          <input
+            type="password"
+            name="prevent_autofill_password"
+            autoComplete="new-password"
+            tabIndex={-1}
+            className="hidden"
+            aria-hidden="true"
+          />
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -69,8 +112,15 @@ const RegisterPage: React.FC = () => {
                 <input
                   {...register('firstName')}
                   type="text"
+                  autoComplete="off"
+                  readOnly={!inputsReady}
                   className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   placeholder="First name"
+                  onFocus={() => {
+                    if (!inputsReady) {
+                      setInputsReady(true);
+                    }
+                  }}
                 />
                 {errors.firstName && (
                   <p className="mt-1 text-sm text-red-600">
@@ -88,8 +138,15 @@ const RegisterPage: React.FC = () => {
                 <input
                   {...register('lastName')}
                   type="text"
+                  autoComplete="off"
+                  readOnly={!inputsReady}
                   className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                   placeholder="Last name"
+                  onFocus={() => {
+                    if (!inputsReady) {
+                      setInputsReady(true);
+                    }
+                  }}
                 />
                 {errors.lastName && (
                   <p className="mt-1 text-sm text-red-600">
@@ -109,9 +166,15 @@ const RegisterPage: React.FC = () => {
               <input
                 {...register('email')}
                 type="email"
-                autoComplete="email"
+                autoComplete="off"
+                readOnly={!inputsReady}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Email address"
+                onFocus={() => {
+                  if (!inputsReady) {
+                    setInputsReady(true);
+                  }
+                }}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">
@@ -130,9 +193,15 @@ const RegisterPage: React.FC = () => {
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
+                autoComplete="off"
+                readOnly={!inputsReady}
                 className="mt-1 appearance-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
                 placeholder="Password"
+                onFocus={() => {
+                  if (!inputsReady) {
+                    setInputsReady(true);
+                  }
+                }}
               />
               <button
                 type="button"
@@ -161,6 +230,7 @@ const RegisterPage: React.FC = () => {
               </label>
               <select
                 {...register('role')}
+                autoComplete="off"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
               >
                 <option value="tenant">Tenant</option>

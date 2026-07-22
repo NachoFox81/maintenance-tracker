@@ -14,6 +14,7 @@ const loginSchema = z.object({
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [inputsReady, setInputsReady] = useState(false);
   const { user, login, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,10 +31,29 @@ const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
+
+  useEffect(() => {
+    reset({
+      email: '',
+      password: '',
+    });
+    setInputsReady(false);
+
+    const frameId = window.requestAnimationFrame(() => {
+      setInputsReady(true);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [reset]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -59,7 +79,27 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
+          autoComplete="off"
+        >
+          <input
+            type="text"
+            name="prevent_autofill_email"
+            autoComplete="username"
+            tabIndex={-1}
+            className="hidden"
+            aria-hidden="true"
+          />
+          <input
+            type="password"
+            name="prevent_autofill_password"
+            autoComplete="current-password"
+            tabIndex={-1}
+            className="hidden"
+            aria-hidden="true"
+          />
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -68,9 +108,15 @@ const LoginPage: React.FC = () => {
               <input
                 {...register('email')}
                 type="email"
-                autoComplete="email"
+                autoComplete="off"
+                readOnly={!inputsReady}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
+                onFocus={() => {
+                  if (!inputsReady) {
+                    setInputsReady(true);
+                  }
+                }}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">
@@ -85,9 +131,15 @@ const LoginPage: React.FC = () => {
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
+                autoComplete="off"
+                readOnly={!inputsReady}
                 className="appearance-none rounded-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
+                onFocus={() => {
+                  if (!inputsReady) {
+                    setInputsReady(true);
+                  }
+                }}
               />
               <button
                 type="button"
