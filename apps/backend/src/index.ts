@@ -13,6 +13,7 @@ import { errorHandler } from './middleware/errorHandler';
 // Routes
 import authRoutes from './routes/auth';
 import maintenanceRequestRoutes from './routes/maintenanceRequests';
+import userRoutes from './routes/users';
 
 const envCandidates = [
   path.resolve(process.cwd(), '.env'),
@@ -66,6 +67,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/maintenance-requests', maintenanceRequestRoutes);
+app.use('/api/users', userRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

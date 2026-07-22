@@ -23,6 +23,17 @@ const VALID_STATUS_TRANSITIONS: Record<
 };
 
 export class MaintenanceRequestService {
+  private readonly requestPopulation = [
+    {
+      path: 'createdBy',
+      select: 'firstName lastName email role',
+    },
+    {
+      path: 'assignedTo',
+      select: 'firstName lastName email role',
+    },
+  ] as const;
+
   async createRequest(
     tenantId: string,
     requestData: CreateMaintenanceRequestInput
@@ -45,18 +56,22 @@ export class MaintenanceRequestService {
       throw createError('Authenticated tenant is required', 401);
     }
 
-    return MaintenanceRequestModel.find({ createdBy: tenantId }).sort({
-      createdAt: -1,
-    });
+    return MaintenanceRequestModel.find({ createdBy: tenantId })
+      .populate(this.requestPopulation)
+      .sort({
+        createdAt: -1,
+      });
   }
 
   async getAllRequests(filters: MaintenanceRequestFilterQuery = {}) {
     return MaintenanceRequestModel.find({
       ...(filters.status && { status: filters.status }),
       ...(filters.priority && { priority: filters.priority }),
-    }).sort({
-      createdAt: -1,
-    });
+    })
+      .populate(this.requestPopulation)
+      .sort({
+        createdAt: -1,
+      });
   }
 
   async assignRequest(
@@ -80,7 +95,7 @@ export class MaintenanceRequestService {
     maintenanceRequest.assignedTo = assignee._id.toString();
     await maintenanceRequest.save();
 
-    return maintenanceRequest;
+    return maintenanceRequest.populate(this.requestPopulation);
   }
 
   async updateStatus(
@@ -109,7 +124,7 @@ export class MaintenanceRequestService {
 
     await maintenanceRequest.save();
 
-    return maintenanceRequest;
+    return maintenanceRequest.populate(this.requestPopulation);
   }
 
   async updatePriority(
@@ -124,7 +139,7 @@ export class MaintenanceRequestService {
     maintenanceRequest.priority = priorityData.priority;
     await maintenanceRequest.save();
 
-    return maintenanceRequest;
+    return maintenanceRequest.populate(this.requestPopulation);
   }
 }
 

@@ -1,5 +1,6 @@
 import api, { handleApiError, handleApiResponse } from './api';
 import {
+  AssignableUser,
   CreateMaintenanceRequestFormData,
   MaintenanceRequestFilters,
   MaintenanceRequest,
@@ -8,6 +9,15 @@ import {
 } from '../types';
 
 export const maintenanceService = {
+  async getAssignableUsers(): Promise<{ users: AssignableUser[] }> {
+    try {
+      const response = await api.get('/users/assignable');
+      return handleApiResponse<{ users: AssignableUser[] }>(response);
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
   async getMyRequests(): Promise<{ maintenanceRequests: MaintenanceRequest[] }> {
     try {
       const response = await api.get('/maintenance-requests');

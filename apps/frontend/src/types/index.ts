@@ -19,6 +19,22 @@ export type MaintenanceRequestPriority =
   | 'high'
   | 'urgent';
 
+export interface MaintenanceRequestUserSummary {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: UserRole;
+}
+
+export interface AssignableUser {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: UserRole;
+}
+
 export interface MaintenanceRequest {
   _id: string;
   title: string;
@@ -26,8 +42,8 @@ export interface MaintenanceRequest {
   priority: MaintenanceRequestPriority;
   status: MaintenanceRequestStatus;
   propertyUnitIdentifier: string;
-  createdBy: string;
-  assignedTo?: string | null;
+  createdBy: string | MaintenanceRequestUserSummary;
+  assignedTo?: string | MaintenanceRequestUserSummary | null;
   completedAt?: string | null;
   createdAt: string;
   updatedAt: string;

@@ -7,6 +7,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import {
+  AssignableUser,
   MaintenanceRequest,
   MaintenanceRequestPriority,
   MaintenanceRequestStatus,
@@ -14,9 +15,9 @@ import {
 } from '../../types';
 import {
   formatDate,
+  formatRequestUser,
   priorityClasses,
   priorityOptions,
-  shortenId,
   statusClasses,
   statusOptions,
 } from './maintenanceViewUtils';
@@ -31,6 +32,7 @@ interface ManagementMaintenanceWorkspaceProps {
   statusFilter: string;
   priorityFilter: string;
   canAssign: boolean;
+  assignableUsers: AssignableUser[];
   assignmentDrafts: Record<string, string>;
   onStatusFilterChange: (value: string) => void;
   onPriorityFilterChange: (value: string) => void;
@@ -59,6 +61,7 @@ const ManagementMaintenanceWorkspace: React.FC<
   statusFilter,
   priorityFilter,
   canAssign,
+  assignableUsers,
   assignmentDrafts,
   onStatusFilterChange,
   onPriorityFilterChange,
@@ -209,8 +212,8 @@ const ManagementMaintenanceWorkspace: React.FC<
                 Active maintenance queue
               </h2>
               <p className="text-sm text-gray-600">
-                Update lifecycle and urgency in-place. Admins can also assign by
-                manager/admin user id until the team directory view is built.
+                Update lifecycle and urgency in-place. Admins can route work to
+                managers and other admins directly from this queue.
               </p>
             </div>
           </div>
@@ -283,13 +286,13 @@ const ManagementMaintenanceWorkspace: React.FC<
                             <p className="font-medium text-gray-800">
                               Created By
                             </p>
-                            <p>{shortenId(request.createdBy)}</p>
+                            <p>{formatRequestUser(request.createdBy)}</p>
                           </div>
                           <div>
                             <p className="font-medium text-gray-800">
                               Assigned To
                             </p>
-                            <p>{shortenId(request.assignedTo)}</p>
+                            <p>{formatRequestUser(request.assignedTo)}</p>
                           </div>
                           <div>
                             <p className="font-medium text-gray-800">
@@ -363,11 +366,13 @@ const ManagementMaintenanceWorkspace: React.FC<
                             >
                               Assign request
                             </label>
-                            <input
+                            <select
                               id={`assign-${request._id}`}
                               value={
                                 assignmentDrafts[request._id] ??
-                                request.assignedTo ??
+                                (typeof request.assignedTo === 'string'
+                                  ? request.assignedTo
+                                  : request.assignedTo?._id) ??
                                 ''
                               }
                               onChange={event =>
@@ -377,8 +382,14 @@ const ManagementMaintenanceWorkspace: React.FC<
                                 )
                               }
                               className="input"
-                              placeholder="Manager or admin user id"
-                            />
+                            >
+                              <option value="">Select assignee</option>
+                              {assignableUsers.map(user => (
+                                <option key={user._id} value={user._id}>
+                                  {user.firstName} {user.lastName} ({user.role})
+                                </option>
+                              ))}
+                            </select>
                             <button
                               type="button"
                               disabled={isRowUpdating}

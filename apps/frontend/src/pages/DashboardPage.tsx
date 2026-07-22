@@ -4,6 +4,7 @@ import TenantMaintenanceWorkspace from '../components/maintenance/TenantMaintena
 import { useAuth } from '../contexts/AuthContext';
 import { maintenanceService } from '../services/maintenanceService';
 import {
+  AssignableUser,
   CreateMaintenanceRequestFormData,
   MaintenanceRequest,
   MaintenanceRequestPriority,
@@ -39,6 +40,7 @@ const DashboardPage: React.FC = () => {
   const [operationsError, setOperationsError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [assignableUsers, setAssignableUsers] = useState<AssignableUser[]>([]);
   const [assignmentDrafts, setAssignmentDrafts] = useState<
     Record<string, string>
   >({});
@@ -73,16 +75,19 @@ const DashboardPage: React.FC = () => {
         }
 
         if (canManageQueue) {
-          const { maintenanceRequests } =
-            await maintenanceService.getAllRequests({
+          const [{ maintenanceRequests }, { users }] = await Promise.all([
+            maintenanceService.getAllRequests({
               ...(statusFilter !== 'all' && {
                 status: statusFilter as MaintenanceRequestStatus,
               }),
               ...(priorityFilter !== 'all' && {
                 priority: priorityFilter as MaintenanceRequestPriority,
               }),
-            });
+            }),
+            maintenanceService.getAssignableUsers(),
+          ]);
           setRequests(maintenanceRequests);
+          setAssignableUsers(users);
           return;
         }
 
@@ -243,6 +248,7 @@ const DashboardPage: React.FC = () => {
       statusFilter={statusFilter}
       priorityFilter={priorityFilter}
       canAssign={canAssign}
+      assignableUsers={assignableUsers}
       assignmentDrafts={assignmentDrafts}
       onStatusFilterChange={setStatusFilter}
       onPriorityFilterChange={setPriorityFilter}

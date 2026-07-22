@@ -1,6 +1,7 @@
 import {
   MaintenanceRequestPriority,
   MaintenanceRequestStatus,
+  MaintenanceRequestUserSummary,
 } from '../../types';
 
 export const statusClasses: Record<MaintenanceRequestStatus, string> = {
@@ -45,4 +46,18 @@ export const shortenId = (value: string | null | undefined) => {
   }
 
   return `${value.slice(0, 6)}...${value.slice(-4)}`;
+};
+
+export const formatRequestUser = (
+  value: string | MaintenanceRequestUserSummary | null | undefined
+) => {
+  if (!value) {
+    return 'Unassigned';
+  }
+
+  if (typeof value === 'string') {
+    return shortenId(value);
+  }
+
+  return `${value.firstName} ${value.lastName}`;
 };
