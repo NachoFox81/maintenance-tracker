@@ -38,6 +38,9 @@ const DashboardPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [operationsError, setOperationsError] = useState<string | null>(null);
+  const [operationsErrorRequestId, setOperationsErrorRequestId] = useState<
+    string | null
+  >(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [assignableUsers, setAssignableUsers] = useState<AssignableUser[]>([]);
@@ -63,6 +66,7 @@ const DashboardPage: React.FC = () => {
       try {
         setLoadError(null);
         setOperationsError(null);
+        setOperationsErrorRequestId(null);
 
         if (!hasLoadedRequests.current) {
           setIsLoadingRequests(true);
@@ -159,12 +163,14 @@ const DashboardPage: React.FC = () => {
     try {
       setActiveRequestId(requestId);
       setOperationsError(null);
+      setOperationsErrorRequestId(null);
       const { maintenanceRequest } = await maintenanceService.updateStatus(
         requestId,
         status
       );
       setRequests(current => replaceRequest(current, maintenanceRequest));
     } catch (error) {
+      setOperationsErrorRequestId(requestId);
       setOperationsError(
         error instanceof Error
           ? error.message
@@ -182,12 +188,14 @@ const DashboardPage: React.FC = () => {
     try {
       setActiveRequestId(requestId);
       setOperationsError(null);
+      setOperationsErrorRequestId(null);
       const { maintenanceRequest } = await maintenanceService.updatePriority(
         requestId,
         priority
       );
       setRequests(current => replaceRequest(current, maintenanceRequest));
     } catch (error) {
+      setOperationsErrorRequestId(requestId);
       setOperationsError(
         error instanceof Error
           ? error.message
@@ -201,6 +209,7 @@ const DashboardPage: React.FC = () => {
   const handleAssignmentUpdate = async (requestId: string) => {
     const assignedTo = assignmentDrafts[requestId]?.trim();
     if (!assignedTo) {
+      setOperationsErrorRequestId(requestId);
       setOperationsError('Enter a manager or admin user id to assign a request.');
       return;
     }
@@ -208,12 +217,14 @@ const DashboardPage: React.FC = () => {
     try {
       setActiveRequestId(requestId);
       setOperationsError(null);
+      setOperationsErrorRequestId(null);
       const { maintenanceRequest } = await maintenanceService.assignRequest(
         requestId,
         assignedTo
       );
       setRequests(current => replaceRequest(current, maintenanceRequest));
     } catch (error) {
+      setOperationsErrorRequestId(requestId);
       setOperationsError(
         error instanceof Error
           ? error.message
@@ -244,12 +255,14 @@ const DashboardPage: React.FC = () => {
     try {
       setActiveRequestId(pendingDeleteRequestId);
       setOperationsError(null);
+      setOperationsErrorRequestId(null);
       await maintenanceService.deleteRequest(pendingDeleteRequestId);
       setRequests(current =>
         current.filter(request => request._id !== pendingDeleteRequestId)
       );
       setPendingDeleteRequestId(null);
     } catch (error) {
+      setOperationsErrorRequestId(pendingDeleteRequestId);
       setOperationsError(
         error instanceof Error
           ? error.message
@@ -287,6 +300,7 @@ const DashboardPage: React.FC = () => {
         requests.find(request => request._id === pendingDeleteRequestId) ?? null
       }
       operationsError={operationsError}
+      operationsErrorRequestId={operationsErrorRequestId}
       statusFilter={statusFilter}
       priorityFilter={priorityFilter}
       canAssign={canAssign}

@@ -32,6 +32,7 @@ interface ManagementMaintenanceWorkspaceProps {
   activeRequestId: string | null;
   pendingDeleteRequest: MaintenanceRequest | null;
   operationsError: string | null;
+  operationsErrorRequestId: string | null;
   statusFilter: string;
   priorityFilter: string;
   canAssign: boolean;
@@ -65,6 +66,7 @@ const ManagementMaintenanceWorkspace: React.FC<
   activeRequestId,
   pendingDeleteRequest,
   operationsError,
+  operationsErrorRequestId,
   statusFilter,
   priorityFilter,
   canAssign,
@@ -235,12 +237,6 @@ const ManagementMaintenanceWorkspace: React.FC<
         </div>
 
         <div className="card-content pt-6">
-          {operationsError ? (
-            <div className="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {operationsError}
-            </div>
-          ) : null}
-
           {isLoadingRequests ? (
             <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-gray-50">
               <div className="flex items-center gap-3 text-sm text-gray-500">
@@ -262,12 +258,22 @@ const ManagementMaintenanceWorkspace: React.FC<
             <div className="space-y-4">
               {requests.map(request => {
                 const isRowUpdating = activeRequestId === request._id;
+                const requestError =
+                  operationsErrorRequestId === request._id
+                    ? operationsError
+                    : null;
 
                 return (
                   <article
                     key={request._id}
                     className="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-5"
                   >
+                    {requestError ? (
+                      <div className="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        {requestError}
+                      </div>
+                    ) : null}
+
                     <div className="flex flex-col gap-5 xl:flex-row xl:justify-between">
                       <div className="space-y-3 xl:max-w-2xl">
                         <div className="flex flex-wrap items-center gap-2">
