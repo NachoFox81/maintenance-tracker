@@ -44,6 +44,9 @@ const DashboardPage: React.FC = () => {
   const [assignmentDrafts, setAssignmentDrafts] = useState<
     Record<string, string>
   >({});
+  const [pendingDeleteRequestId, setPendingDeleteRequestId] = useState<
+    string | null
+  >(null);
   const hasLoadedRequests = useRef(false);
 
   const isTenant = user?.role === 'tenant';
@@ -222,27 +225,30 @@ const DashboardPage: React.FC = () => {
   };
 
   const handleDeleteRequest = async (requestId: string) => {
-    const requestToDelete = requests.find(request => request._id === requestId);
+    setPendingDeleteRequestId(requestId);
+  };
 
-    if (!requestToDelete) {
+  const handleDeleteCancel = () => {
+    if (activeRequestId) {
       return;
     }
 
-    const shouldDelete = window.confirm(
-      `Delete "${requestToDelete.title}"? This cannot be undone.`
-    );
+    setPendingDeleteRequestId(null);
+  };
 
-    if (!shouldDelete) {
+  const handleDeleteConfirm = async () => {
+    if (!pendingDeleteRequestId) {
       return;
     }
 
     try {
-      setActiveRequestId(requestId);
+      setActiveRequestId(pendingDeleteRequestId);
       setOperationsError(null);
-      await maintenanceService.deleteRequest(requestId);
+      await maintenanceService.deleteRequest(pendingDeleteRequestId);
       setRequests(current =>
-        current.filter(request => request._id !== requestId)
+        current.filter(request => request._id !== pendingDeleteRequestId)
       );
+      setPendingDeleteRequestId(null);
     } catch (error) {
       setOperationsError(
         error instanceof Error
@@ -277,6 +283,9 @@ const DashboardPage: React.FC = () => {
       isLoadingRequests={isLoadingRequests}
       isRefreshing={isRefreshing}
       activeRequestId={activeRequestId}
+      pendingDeleteRequest={
+        requests.find(request => request._id === pendingDeleteRequestId) ?? null
+      }
       operationsError={operationsError}
       statusFilter={statusFilter}
       priorityFilter={priorityFilter}
@@ -291,6 +300,8 @@ const DashboardPage: React.FC = () => {
       }}
       onStatusUpdate={handleStatusUpdate}
       onPriorityUpdate={handlePriorityUpdate}
+      onDeleteCancel={handleDeleteCancel}
+      onDeleteConfirm={handleDeleteConfirm}
       onAssignmentDraftChange={(requestId, value) =>
         setAssignmentDrafts(current => ({
           ...current,

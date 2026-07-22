@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
+import MaintenanceRequestDeleteModal from './MaintenanceRequestDeleteModal';
 import {
   AssignableUser,
   MaintenanceRequest,
@@ -29,6 +30,7 @@ interface ManagementMaintenanceWorkspaceProps {
   isLoadingRequests: boolean;
   isRefreshing: boolean;
   activeRequestId: string | null;
+  pendingDeleteRequest: MaintenanceRequest | null;
   operationsError: string | null;
   statusFilter: string;
   priorityFilter: string;
@@ -48,6 +50,8 @@ interface ManagementMaintenanceWorkspaceProps {
   ) => Promise<void>;
   onAssignmentDraftChange: (requestId: string, value: string) => void;
   onAssignmentUpdate: (requestId: string) => Promise<void>;
+  onDeleteCancel: () => void;
+  onDeleteConfirm: () => Promise<void>;
   onDeleteRequest: (requestId: string) => Promise<void>;
 }
 
@@ -59,6 +63,7 @@ const ManagementMaintenanceWorkspace: React.FC<
   isLoadingRequests,
   isRefreshing,
   activeRequestId,
+  pendingDeleteRequest,
   operationsError,
   statusFilter,
   priorityFilter,
@@ -72,10 +77,17 @@ const ManagementMaintenanceWorkspace: React.FC<
   onPriorityUpdate,
   onAssignmentDraftChange,
   onAssignmentUpdate,
+  onDeleteCancel,
+  onDeleteConfirm,
   onDeleteRequest,
 }) => {
+  const isDeletingPendingRequest =
+    pendingDeleteRequest?._id !== undefined &&
+    activeRequestId === pendingDeleteRequest._id;
+
   return (
-    <div className="space-y-8">
+    <>
+      <div className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-sky-700">
@@ -433,7 +445,17 @@ const ManagementMaintenanceWorkspace: React.FC<
           )}
         </div>
       </section>
-    </div>
+      </div>
+
+      {pendingDeleteRequest ? (
+        <MaintenanceRequestDeleteModal
+          request={pendingDeleteRequest}
+          isDeleting={isDeletingPendingRequest}
+          onCancel={onDeleteCancel}
+          onConfirm={onDeleteConfirm}
+        />
+      ) : null}
+    </>
   );
 };
 
