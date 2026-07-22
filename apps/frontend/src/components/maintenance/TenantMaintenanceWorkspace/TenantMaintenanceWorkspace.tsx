@@ -1,30 +1,11 @@
 import React from 'react';
 import { AlertCircle, ClipboardList, Loader2, PlusCircle } from 'lucide-react';
 import {
-  CreateMaintenanceRequestFormData,
-  MaintenanceRequest,
-} from '../../../types';
-import {
   formatDate,
   priorityClasses,
   statusClasses,
 } from '../maintenanceViewUtils';
-
-interface TenantMaintenanceWorkspaceProps {
-  firstName?: string;
-  requests: MaintenanceRequest[];
-  formValues: CreateMaintenanceRequestFormData;
-  isLoadingRequests: boolean;
-  isSubmitting: boolean;
-  loadError: string | null;
-  submitError: string | null;
-  onChange: (
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
-}
+import { TenantMaintenanceWorkspaceProps } from './TenantMaintenanceWorkspace.types';
 
 const TenantMaintenanceWorkspace: React.FC<TenantMaintenanceWorkspaceProps> = ({
   firstName,

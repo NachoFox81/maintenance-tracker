@@ -1,6 +1,6 @@
 import React from 'react';
-import ManagementMaintenanceWorkspace from '../../components/maintenance/ManagementMaintenanceWorkspace/ManagementMaintenanceWorkspace';
-import TenantMaintenanceWorkspace from '../../components/maintenance/TenantMaintenanceWorkspace/TenantMaintenanceWorkspace';
+import ManagementMaintenanceWorkspace from '../../components/maintenance/ManagementMaintenanceWorkspace';
+import TenantMaintenanceWorkspace from '../../components/maintenance/TenantMaintenanceWorkspace';
 import { useAuth } from '../../contexts/AuthContext';
 import useDashboardMaintenance from './hooks/useDashboardMaintenance';
 

@@ -1,13 +1,6 @@
 import React from 'react';
 import { Loader2, Trash2 } from 'lucide-react';
-import { MaintenanceRequest } from '../../../types';
-
-interface MaintenanceRequestDeleteModalProps {
-  request: MaintenanceRequest;
-  isDeleting: boolean;
-  onCancel: () => void;
-  onConfirm: () => Promise<void>;
-}
+import { MaintenanceRequestDeleteModalProps } from './MaintenanceRequestDeleteModal.types';
 
 const MaintenanceRequestDeleteModal: React.FC<
   MaintenanceRequestDeleteModalProps
