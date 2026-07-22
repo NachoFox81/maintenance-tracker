@@ -57,13 +57,13 @@ export class AuthService {
     // Find user and include password for comparison
     const user = await UserModel.findOne({ email }).select('+password');
     if (!user) {
-      throw createError('Invalid email or password', 401);
+      throw createError('No account found for that email address', 404);
     }
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      throw createError('Invalid email or password', 401);
+      throw createError('Incorrect password', 401);
     }
 
     // Generate token

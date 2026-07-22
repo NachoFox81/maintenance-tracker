@@ -31,7 +31,8 @@ const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-    reset,
+    clearErrors,
+    setError,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,10 +43,6 @@ const LoginPage: React.FC = () => {
   });
 
   useEffect(() => {
-    reset({
-      email: '',
-      password: '',
-    });
     setInputsReady(false);
 
     const frameId = window.requestAnimationFrame(() => {
@@ -53,14 +50,18 @@ const LoginPage: React.FC = () => {
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [reset]);
+  }, []);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
+      clearErrors('root');
       await login(data);
       // Navigation will be handled by useEffect when user state updates
     } catch (error) {
-      // Error is handled by the auth context
+      setError('root', {
+        type: 'server',
+        message: error instanceof Error ? error.message : 'Login failed',
+      });
     }
   };
 
@@ -161,6 +162,11 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div>
+            {errors.root?.message && (
+              <p className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errors.root.message}
+              </p>
+            )}
             <button
               type="submit"
               disabled={loading}

@@ -9,6 +9,19 @@ import { ApiResponse } from '../types';
 import toast from 'react-hot-toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || DEFAULT_API_BASE_PATH;
+const PUBLIC_AUTH_PATHS = ['/auth/login', '/auth/register'];
+
+export const shouldRedirectToLogin = (error: {
+  response?: { status?: number };
+  config?: { url?: string };
+}): boolean => {
+  if (error.response?.status !== 401) {
+    return false;
+  }
+
+  const requestUrl = error.config?.url ?? '';
+  return !PUBLIC_AUTH_PATHS.some(path => requestUrl.includes(path));
+};
 
 // Create axios instance
 export const api = axios.create({
@@ -39,7 +52,7 @@ api.interceptors.response.use(
     return response;
   },
   error => {
-    if (error.response?.status === 401) {
+    if (shouldRedirectToLogin(error)) {
       // Token expired or invalid
       localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
       localStorage.removeItem(AUTH_USER_STORAGE_KEY);
@@ -69,7 +82,12 @@ export const handleApiResponse = <T>(response: { data: ApiResponse<T> }): T => {
 };
 
 // Helper function to handle API errors
-export const handleApiError = (error: any): never => {
+export const handleApiError = (
+  error: {
+    response?: { data?: { message?: string } };
+    message?: string;
+  }
+): never => {
   if (error.response?.data?.message) {
     throw new Error(error.response.data.message);
   } else if (error.message) {

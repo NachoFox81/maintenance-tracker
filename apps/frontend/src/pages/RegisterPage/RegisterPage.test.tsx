@@ -105,4 +105,48 @@ describe('RegisterPage', () => {
     );
     expect(mockNavigate).toHaveBeenCalledWith('/');
   });
+
+  it('keeps typed values after a failed registration attempt', async () => {
+    const register = vi
+      .fn()
+      .mockRejectedValue(new Error('User already exists with this email'));
+
+    mockUseAuth.mockReturnValue({
+      register,
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <RegisterPage />
+      </MemoryRouter>
+    );
+
+    const firstNameInput = screen.getByPlaceholderText('First name') as HTMLInputElement;
+    const lastNameInput = screen.getByPlaceholderText('Last name') as HTMLInputElement;
+    const emailInput = screen.getByPlaceholderText('Email address') as HTMLInputElement;
+    const passwordInput = screen.getByPlaceholderText('Password') as HTMLInputElement;
+
+    fireEvent.change(firstNameInput, {
+      target: { value: 'Taylor' },
+    });
+    fireEvent.change(lastNameInput, {
+      target: { value: 'Brooks' },
+    });
+    fireEvent.change(emailInput, {
+      target: { value: 'taylor@example.com' },
+    });
+    fireEvent.change(passwordInput, {
+      target: { value: 'secret123' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+
+    await waitFor(() => expect(register).toHaveBeenCalledTimes(1));
+    expect(firstNameInput.value).toBe('Taylor');
+    expect(lastNameInput.value).toBe('Brooks');
+    expect(emailInput.value).toBe('taylor@example.com');
+    expect(passwordInput.value).toBe('secret123');
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
 });

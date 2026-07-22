@@ -25,7 +25,6 @@ const RegisterPage: React.FC = () => {
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -39,13 +38,6 @@ const RegisterPage: React.FC = () => {
   });
 
   useEffect(() => {
-    reset({
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      role: DEFAULT_USER_ROLE,
-    });
     setInputsReady(false);
 
     const frameId = window.requestAnimationFrame(() => {
@@ -53,7 +45,7 @@ const RegisterPage: React.FC = () => {
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [reset]);
+  }, []);
 
   const onSubmit = async (data: RegisterFormData) => {
     try {

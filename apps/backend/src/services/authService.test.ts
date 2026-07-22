@@ -130,11 +130,30 @@ describe('AuthService', () => {
         password: 'wrong-password',
       })
     ).rejects.toMatchObject({
-      message: 'Invalid email or password',
+      message: 'Incorrect password',
       statusCode: 401,
     });
 
     expect(findOneMock).toHaveBeenCalledWith({ email: 'user@example.com' });
+  });
+
+  it('returns a specific error when the email does not exist', async () => {
+    const { AuthService } = await import('./authService');
+    const service = new AuthService();
+
+    findOneMock.mockReturnValue({
+      select: vi.fn().mockResolvedValue(null),
+    });
+
+    await expect(
+      service.login({
+        email: 'missing@example.com',
+        password: 'secret123',
+      })
+    ).rejects.toMatchObject({
+      message: 'No account found for that email address',
+      statusCode: 404,
+    });
   });
 
   it('returns the user for a valid verified token', async () => {

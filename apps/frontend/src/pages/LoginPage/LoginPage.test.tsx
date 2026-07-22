@@ -119,4 +119,35 @@ describe('LoginPage', () => {
       })
     );
   });
+
+  it('shows a backend login error without clearing the typed values', async () => {
+    const login = vi
+      .fn()
+      .mockRejectedValue(new Error('No account found for that email address'));
+
+    mockUseAuth.mockReturnValue({
+      user: null,
+      login,
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    );
+
+    const emailInput = screen.getByPlaceholderText('Email address') as HTMLInputElement;
+    const passwordInput = screen.getByPlaceholderText('Password') as HTMLInputElement;
+
+    fireEvent.change(emailInput, { target: { value: 'missing@doorloop.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'secret123' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect(
+      await screen.findByText('No account found for that email address')
+    ).toBeInTheDocument();
+    expect(emailInput.value).toBe('missing@doorloop.com');
+    expect(passwordInput.value).toBe('secret123');
+  });
 });
